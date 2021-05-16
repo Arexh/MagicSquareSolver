@@ -1,3 +1,5 @@
+package util;
+
 public class TimeUtil {
 
     public static long getCurrentTime() {
