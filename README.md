@@ -1,0 +1,3 @@
+# MagicSquareSolver
+
+Still developing...
