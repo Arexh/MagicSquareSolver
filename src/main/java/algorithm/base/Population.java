@@ -6,33 +6,50 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Population {
     protected static final Logger logger = LogManager.getLogger(Population.class);
     private final Individual[] individualArray;
     private boolean isNeedSort;
+    private Set<Individual> individualSet;
 
-    public Population(int size, int dimension, FitnessFunction fitnessFunction) {
-        this.individualArray = new Individual[size];
-        for (int i = 0; i < size; i++) {
+    public Population(int populationSize, int dimension, FitnessFunction fitnessFunction) {
+        this.individualArray = new Individual[populationSize];
+        this.individualSet = new HashSet<>();
+        for (int i = 0; i < populationSize; i++) {
             this.individualArray[i] = new Individual(dimension, fitnessFunction);
             this.individualArray[i].shuffleMatrix();
+            this.individualSet.add(this.individualArray[i]);
         }
         this.isNeedSort = true;
     }
 
     public void setIndividual(int index, Individual individual) {
+        if (this.individualSet.contains(individual)) return;
+        this.individualSet.remove(this.individualArray[index]);
         this.individualArray[index] = individual;
         isNeedSort = true;
+        this.individualSet.add(individual);
     }
 
     public int getSize() {
         return this.individualArray.length;
     }
 
+    public Individual getIndividual(int index) {
+        return this.individualArray[index];
+    }
+
     public Individual getBestIndividual() {
         sortAccordingFitness();
-        return individualArray[0];
+        return this.individualArray[0];
+    }
+
+    public Individual getWorstIndividual() {
+        sortAccordingFitness();
+        return this.individualArray[getSize() - 1];
     }
 
     public void evaluateIndividuals() {
@@ -41,12 +58,16 @@ public class Population {
         }
     }
 
-    private void sortAccordingFitness() {
+    public void sortAccordingFitness() {
         if (!isNeedSort) return;
         logger.debug("Sorting population...");
-        logger.debug(toString());
+//        logger.debug(toString());
         Arrays.sort(this.individualArray, Comparator.comparingLong(Individual::getFitness));
-        logger.debug(toString());
+//        logger.debug(toString());
+//        for (Individual individual : this.individualArray) {
+//            System.out.println(individual);
+//            System.out.println();
+//        }
         this.isNeedSort = false;
     }
 

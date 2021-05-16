@@ -116,8 +116,8 @@ public class Individual {
 
     public void randomSwapTwoNumberInAntiDiagonal() {
         List<Integer> sequence = getRandomSequence(getDimension());
-        swapTwoNumber(sequence.get(0), getDimension() - sequence.get(0),
-                sequence.get(getDimension() - 1), getDimension() - sequence.get(getDimension() - 1));
+        swapTwoNumber(sequence.get(0), getDimension() - sequence.get(0) - 1,
+                sequence.get(getDimension() - 1), getDimension() - sequence.get(getDimension() - 1) - 1);
     }
 
     public void swapTwoNumber(int rowOne, int colOne, int rowTwo, int colTwo) {
@@ -179,6 +179,31 @@ public class Individual {
         }
         Collections.shuffle(list);
         return list;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj instanceof Individual) {
+            Individual objIndividual = (Individual) obj;
+            if (objIndividual.getFitness() != getFitness()) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 1;
+
+        for (int[] a : this.matrix)
+            for (int b : a)
+            result = 31 * result + b;
+
+        return result;
     }
 
     public static void main(String[] args) {
