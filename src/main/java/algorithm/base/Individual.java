@@ -186,11 +186,7 @@ public class Individual {
         if (obj == this) return true;
         if (obj instanceof Individual) {
             Individual objIndividual = (Individual) obj;
-            if (objIndividual.getFitness() != getFitness()) {
-                return false;
-            } else {
-                return true;
-            }
+            return objIndividual.getFitness() == getFitness();
         }
         return true;
     }

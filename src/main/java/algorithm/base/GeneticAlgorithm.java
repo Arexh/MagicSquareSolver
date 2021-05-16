@@ -1,30 +1,23 @@
 package algorithm.base;
 
-import algorithm.base.operator.CrossOverOperator;
-import algorithm.base.operator.MutationOperator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class GeneticAlgorithm {
-    private final static int LOG_PER_GENERATIONS = 1000;
+public abstract class GeneticAlgorithm {
     protected static final Logger logger = LogManager.getLogger(GeneticAlgorithm.class);
-    private final MutationOperator mutationOperator;
-    private final CrossOverOperator crossOverOperator;
-    private final Population population;
+    protected final Population population;
+    protected final int dimension;
+    protected final int populationSize;
+    protected final int logPeriod;
 
     private int generation;
 
-    public GeneticAlgorithm(MutationOperator mutationOperator,
-                            CrossOverOperator crossOverOperator,
-                            Population population) {
-        this.mutationOperator = mutationOperator;
-        this.crossOverOperator = crossOverOperator;
-        this.population = population;
+    public GeneticAlgorithm(int populationSize, int dimension, int logPeriod) {
+        this.populationSize = populationSize;
+        this.dimension = dimension;
         this.generation = 0;
-    }
-
-    public GeneticAlgorithm(MutationOperator mutationOperator, Population population) {
-        this(mutationOperator, null, population);
+        this.logPeriod = logPeriod;
+        this.population = initPopulation();
     }
 
     public void step() {
@@ -35,24 +28,18 @@ public class GeneticAlgorithm {
         this.generation++;
     }
 
-    private void evaluate() {
-        population.evaluateIndividuals();
-    }
+    protected abstract Population initPopulation();
 
-    private void mutate() {
-        if (this.mutationOperator != null) {
-            this.mutationOperator.mutate(this.population);
-        }
-    }
+    protected abstract void mutate();
 
-    private void crossOver() {
-        if (this.crossOverOperator != null) {
-            this.crossOverOperator.crossOver(this.population);
-        }
+    protected abstract void crossOver();
+
+    protected void evaluate() {
+        this.population.evaluateIndividuals();
     }
 
     private void logResult() {
-        if (this.generation % LOG_PER_GENERATIONS == 0) {
+        if (this.generation % this.logPeriod == 0) {
             logger.debug("Gen: " + this.generation + ", " + this.population);
         }
     }

@@ -60,7 +60,7 @@ public class Population {
 
     public void sortAccordingFitness() {
         if (!isNeedSort) return;
-        logger.debug("Sorting population...");
+//        logger.debug("Sorting population...");
 //        logger.debug(toString());
         Arrays.sort(this.individualArray, Comparator.comparingLong(Individual::getFitness));
 //        logger.debug(toString());
