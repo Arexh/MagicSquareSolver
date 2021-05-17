@@ -9,12 +9,14 @@ public abstract class GeneticAlgorithm {
     protected final int dimension;
     protected final int populationSize;
     protected final int logPeriod;
+    protected final int size;
 
     private int generation;
 
     public GeneticAlgorithm(int populationSize, int dimension, int logPeriod) {
         this.populationSize = populationSize;
         this.dimension = dimension;
+        this.size = dimension * dimension;
         this.generation = 0;
         this.logPeriod = logPeriod;
         this.population = initPopulation();

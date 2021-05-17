@@ -3,7 +3,10 @@ package algorithm.base;
 import algorithm.base.operator.FitnessFunction;
 import util.RandomUtil;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class Individual {
     public final static long FIRST_CREATE_TIME = System.currentTimeMillis();
@@ -11,10 +14,14 @@ public class Individual {
 
     private final int[][] matrix;
     private final FitnessFunction fitnessFunction;
+    private final int dimension;
+    private final int size;
     private long fitness = -1;
 
-    public Individual(int n, FitnessFunction fitnessFunction) {
-        this.matrix = new int[n][n];
+    public Individual(int dimension, FitnessFunction fitnessFunction) {
+        this.matrix = new int[dimension][dimension];
+        this.size = dimension * dimension;
+        this.dimension = dimension;
         this.fitnessFunction = fitnessFunction;
         initMatrix();
         individualCount++;
@@ -23,7 +30,21 @@ public class Individual {
     public Individual(Individual individual, FitnessFunction fitnessFunction) {
         this.matrix = deepCopy(individual.matrix);
         this.fitnessFunction = fitnessFunction;
+        this.dimension = this.matrix.length;
+        this.size = this.dimension * this.dimension;
         individualCount++;
+    }
+
+    public void setValue(int index, int val) {
+        this.matrix[index / this.dimension][index % this.dimension] = val;
+    }
+
+    public void setValue(int row, int col, int val) {
+        this.matrix[row][col] = val;
+    }
+
+    public int getValue(int index) {
+        return this.matrix[index / this.dimension][index % this.dimension];
     }
 
     public int getValue(int row, int col) {
@@ -31,11 +52,11 @@ public class Individual {
     }
 
     public int getDimension() {
-        return this.matrix.length;
+        return this.dimension;
     }
 
     public int getSize() {
-        return getDimension() * getDimension();
+        return this.dimension * this.dimension;
     }
 
     public long getFitness() {
@@ -46,104 +67,108 @@ public class Individual {
     }
 
     public void shuffleMatrix() {
-        List<Integer> list = new ArrayList<>(getSize());
-        for (int i = 0; i < getDimension(); i++) {
-            for (int j = 0; j < getDimension(); j++) {
+        List<Integer> list = new ArrayList<>(this.size);
+        for (int i = 0; i < this.dimension; i++) {
+            for (int j = 0; j < this.dimension; j++) {
                 list.add(this.matrix[i][j]);
             }
         }
         Collections.shuffle(list);
         int index = 0;
-        for (int i = 0; i < getDimension(); i++) {
-            for (int j = 0; j < getDimension(); j++) {
+        for (int i = 0; i < this.dimension; i++) {
+            for (int j = 0; j < this.dimension; j++) {
                 this.matrix[i][j] = list.get(index++);
             }
         }
     }
 
     public void shuffleRow(int row) {
-        List<Integer> list = new ArrayList<>(getDimension());
-        for (int i = 0; i < getDimension(); i++) {
+        List<Integer> list = new ArrayList<>(this.dimension);
+        for (int i = 0; i < this.dimension; i++) {
             list.add(this.matrix[row][i]);
         }
         Collections.shuffle(list);
-        for (int i = 0; i < getDimension(); i++) {
+        for (int i = 0; i < this.dimension; i++) {
             this.matrix[row][i] = list.get(i);
         }
     }
 
     public void shuffleColumn(int col) {
-        List<Integer> list = new ArrayList<>(getDimension());
-        for (int i = 0; i < getDimension(); i++) {
+        List<Integer> list = new ArrayList<>(this.dimension);
+        for (int i = 0; i < this.dimension; i++) {
             list.add(this.matrix[i][col]);
         }
         Collections.shuffle(list);
-        for (int i = 0; i < getDimension(); i++) {
+        for (int i = 0; i < this.dimension; i++) {
             this.matrix[i][col] = list.get(i);
         }
     }
 
     public void shuffleMainDiagonal() {
-        List<Integer> list = new ArrayList<>(getDimension());
-        for (int i = 0; i < getDimension(); i++) {
+        List<Integer> list = new ArrayList<>(this.dimension);
+        for (int i = 0; i < this.dimension; i++) {
             list.add(this.matrix[i][i]);
         }
         Collections.shuffle(list);
-        for (int i = 0; i < getDimension(); i++) {
+        for (int i = 0; i < this.dimension; i++) {
             this.matrix[i][i] = list.get(i);
         }
     }
 
     public void shuffleAntiDiagonal() {
-        List<Integer> list = new ArrayList<>(getDimension());
-        for (int i = 0; i < getDimension(); i++) {
-            list.add(this.matrix[i][getDimension() - 1 - i]);
+        List<Integer> list = new ArrayList<>(this.dimension);
+        for (int i = 0; i < this.dimension; i++) {
+            list.add(this.matrix[i][this.dimension - 1 - i]);
         }
         Collections.shuffle(list);
-        for (int i = 0; i < getDimension(); i++) {
-            this.matrix[i][getDimension() - 1 - i] = list.get(i);
+        for (int i = 0; i < this.dimension; i++) {
+            this.matrix[i][this.dimension - 1 - i] = list.get(i);
         }
     }
 
     public void randomSwapTwoNumberInRow(int row) {
-        int[] indexes = generateTwoRandomIndex(getDimension(), getDimension());
+        int[] indexes = generateTwoRandomIndex(this.dimension, this.dimension);
         swapTwoNumber(row, indexes[0], row, indexes[1]);
     }
 
     public void randomSwapTwoNumberInCol(int col) {
-        int[] indexes = generateTwoRandomIndex(getDimension(), getDimension());
+        int[] indexes = generateTwoRandomIndex(this.dimension, this.dimension);
         swapTwoNumber(indexes[0], col, indexes[1], col);
     }
 
     public void randomSwapTwoNumberInMainDiagonal() {
-        int[] indexes = generateTwoRandomIndex(getDimension(), getDimension());
+        int[] indexes = generateTwoRandomIndex(this.dimension, this.dimension);
         swapTwoNumber(indexes[0], indexes[0], indexes[1], indexes[1]);
     }
 
     public void randomSwapTwoNumberInAntiDiagonal() {
-        int[] indexes = generateTwoRandomIndex(getDimension(), getDimension());
-        swapTwoNumber(indexes[0], getDimension() - indexes[0] - 1,
-                indexes[1], getDimension() - indexes[1] - 1);
+        int[] indexes = generateTwoRandomIndex(this.dimension, this.dimension);
+        swapTwoNumber(indexes[0], this.dimension - indexes[0] - 1,
+                indexes[1], this.dimension - indexes[1] - 1);
     }
 
-    public void randomSwapTwoNumberInMatrix() {
-        int[] indexes = generateTwoRandomIndex(getSize(), getSize());
-        swapTwoNumber(indexes[0] / getDimension(), indexes[0] % getDimension(),
-                indexes[1] / getDimension(), indexes[1] % getDimension());
-    }
-
-    public void randomSwapTwoNumberInMatrix(int step) {
-        int[] indexes = generateTwoRandomIndex(step, getSize());
-        swapTwoNumber(indexes[0] / getDimension(), indexes[0] % getDimension(),
-                indexes[1] / getDimension(), indexes[1] % getDimension());
-    }
+//    public void randomSwapTwoNumberInMatrix() {
+//        int[] indexes = generateTwoRandomIndex(this.size, this.size);
+//        swapTwoNumber(indexes[0] / this.dimension, indexes[0] % this.dimension,
+//                indexes[1] / this.dimension, indexes[1] % this.dimension);
+//    }
+//
+//    public void randomSwapTwoNumberInMatrix(int step) {
+//        int[] indexes = generateTwoRandomIndex(step, this.size);
+//        swapTwoNumber(indexes[0] / this.dimension, indexes[0] % this.dimension,
+//                indexes[1] / this.dimension, indexes[1] % this.dimension);
+//    }
 
     public void randomSwapWithNeighbor(int row, int col, int step) {
-        assert step <= getSize();
-        int firstIndex = row * getDimension() + col;
-        int secondIndex = (firstIndex + RandomUtil.randomInt(-step, step + 1) + getSize()) % getSize();
-        swapTwoNumber(firstIndex / getDimension(), firstIndex % getDimension(),
-                secondIndex / getDimension(), secondIndex % getDimension());
+        assert step <= this.size;
+        int firstIndex = row * this.dimension + col;
+        int secondIndex = (firstIndex + RandomUtil.randomInt(-step, step + 1) + this.size) % this.size;
+        swapTwoNumber(firstIndex, secondIndex);
+    }
+
+    public void swapTwoNumber(int indexOne, int indexTwo) {
+        swapTwoNumber(indexOne / this.dimension, indexOne % this.dimension,
+                indexTwo / this.dimension, indexTwo % this.dimension);
     }
 
     public void swapTwoNumber(int rowOne, int colOne, int rowTwo, int colTwo) {
@@ -153,21 +178,21 @@ public class Individual {
     }
 
     public void swapRow(int rowOne, int rowTwo) {
-        int[] tempArray = new int[getDimension()];
-        System.arraycopy(this.matrix[rowOne], 0, tempArray, 0, getDimension());
-        System.arraycopy(this.matrix[rowTwo], 0, this.matrix[rowOne], 0, getDimension());
-        System.arraycopy(tempArray, 0, this.matrix[rowTwo], 0, getDimension());
+        int[] tempArray = new int[this.dimension];
+        System.arraycopy(this.matrix[rowOne], 0, tempArray, 0, this.dimension);
+        System.arraycopy(this.matrix[rowTwo], 0, this.matrix[rowOne], 0, this.dimension);
+        System.arraycopy(tempArray, 0, this.matrix[rowTwo], 0, this.dimension);
     }
 
     public void swapCol(int colOne, int colTwo) {
-        int[] tempArray = new int[getDimension()];
-        for (int i = 0; i < getDimension(); i++) {
+        int[] tempArray = new int[this.dimension];
+        for (int i = 0; i < this.dimension; i++) {
             tempArray[i] = this.matrix[i][colOne];
         }
-        for (int i = 0; i < getDimension(); i++) {
+        for (int i = 0; i < this.dimension; i++) {
             this.matrix[i][colOne] = this.matrix[i][colTwo];
         }
-        for (int i = 0; i < getDimension(); i++) {
+        for (int i = 0; i < this.dimension; i++) {
             this.matrix[i][colTwo] = tempArray[i];
         }
     }
@@ -175,11 +200,11 @@ public class Individual {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < getDimension(); i++) {
-            for (int j = 0; j < getDimension() - 1; j++) {
+        for (int i = 0; i < this.dimension; i++) {
+            for (int j = 0; j < this.dimension - 1; j++) {
                 sb.append(this.matrix[i][j]).append("\t");
             }
-            sb.append(this.matrix[i][getDimension() - 1]).append("\n");
+            sb.append(this.matrix[i][this.dimension - 1]).append("\n");
         }
         sb.deleteCharAt(sb.length() - 1);
         return sb.toString();
@@ -187,8 +212,8 @@ public class Individual {
 
     private void initMatrix() {
         int count = 0;
-        for (int i = 0; i < getDimension(); i++) {
-            for (int j = 0; j < getDimension(); j++) {
+        for (int i = 0; i < this.dimension; i++) {
+            for (int j = 0; j < this.dimension; j++) {
                 this.matrix[i][j] = ++count;
             }
         }
@@ -201,7 +226,7 @@ public class Individual {
     private int[] generateTwoRandomIndex(int range, int clip) {
         int[] indexes = new int[2];
         indexes[0] = RandomUtil.randomInt(1, range);
-        indexes[1] = (indexes[0] + RandomUtil.randomInt(1, getDimension())) % clip;
+        indexes[1] = (indexes[0] + RandomUtil.randomInt(1, this.dimension)) % clip;
         return indexes;
     }
 
@@ -239,8 +264,8 @@ public class Individual {
         Individual one = new Individual(3, EvaluationFunction::absoluteFitnessFunction);
         System.out.println("An new individual: ");
         System.out.println(one);
-        System.out.println("Dimension: " + one.getDimension());
-        System.out.println("Size: " + one.getSize());
+        System.out.println("Dimension: " + one.dimension);
+        System.out.println("Size: " + one.size);
         System.out.println("Fitness: " + one.getFitness());
         System.out.println("-----------------------");
         System.out.println("Test shuffleMatrix(): ");
@@ -248,11 +273,11 @@ public class Individual {
         System.out.println(one);
         System.out.println("-----------------------");
         System.out.println("Test shuffleRow(lastRow): ");
-        one.shuffleRow(one.getDimension() - 1);
+        one.shuffleRow(one.dimension - 1);
         System.out.println(one);
         System.out.println("-----------------------");
         System.out.println("Test shuffleCol(lastCol): ");
-        one.shuffleColumn(one.getDimension() - 1);
+        one.shuffleColumn(one.dimension - 1);
         System.out.println(one);
         System.out.println("-----------------------");
         System.out.println("Test shuffleMainDiagonal(): ");
@@ -280,11 +305,11 @@ public class Individual {
         System.out.println(one);
         System.out.println("-----------------------");
         System.out.println("Test swapRow(0, lastRow): ");
-        one.swapRow(0, one.getDimension() - 1);
+        one.swapRow(0, one.dimension - 1);
         System.out.println(one);
         System.out.println("-----------------------");
         System.out.println("Test swapCol(0, lastCol): ");
-        one.swapCol(0, one.getDimension() - 1);
+        one.swapCol(0, one.dimension - 1);
         System.out.println(one);
         System.out.println("-----------------------");
         System.out.println("Test copy constructor");
