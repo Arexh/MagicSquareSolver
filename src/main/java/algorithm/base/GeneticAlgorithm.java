@@ -41,6 +41,7 @@ public abstract class GeneticAlgorithm {
     private void logResult() {
         if (this.generation % this.logPeriod == 0) {
             logger.debug("Gen: " + this.generation + ", " + this.population);
+            logger.debug("Individuals Per Millisecond: " + Individual.individualCount / (System.currentTimeMillis() - Individual.FIRST_CREATE_TIME));
         }
     }
 }

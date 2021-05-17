@@ -28,21 +28,28 @@ public class MagicSquareGeneticSolver extends GeneticAlgorithm {
     @Override
     protected void mutate() {
         this.population.sortAccordingFitness();
-        for (int j = 0; j < 1; j++) {
+        for (int j = 0; j < this.dimension; j++) {
             Individual bestIndividual = this.population.getIndividual(j);
             Individual childIndividual = new Individual(bestIndividual, fitnessFunction);
-            for (int i = 0; i < MagicSquareGeneticSolver.this.dimension; i++) {
-                if (RandomUtil.randomBoolean(0.7)) {
-                    childIndividual.randomSwapTwoNumberInCol(i);
-                }
-                if (RandomUtil.randomBoolean(0.7)) {
-                    childIndividual.randomSwapTwoNumberInRow(i);
-                }
-                if (RandomUtil.randomBoolean(0.5)) {
-                    childIndividual.randomSwapTwoNumberInAntiDiagonal();
-                }
-                if (RandomUtil.randomBoolean(0.5)) {
-                    childIndividual.randomSwapTwoNumberInMainDiagonal();
+//            for (int i = 0; i < MagicSquareGeneticSolver.this.dimension; i++) {
+//                if (RandomUtil.randomBoolean(0.7)) {
+//                    childIndividual.randomSwapTwoNumberInCol(i);
+//                }
+//                if (RandomUtil.randomBoolean(0.7)) {
+//                    childIndividual.randomSwapTwoNumberInRow(i);
+//                }
+//                if (RandomUtil.randomBoolean(0.5)) {
+//                    childIndividual.randomSwapTwoNumberInAntiDiagonal();
+//                }
+//                if (RandomUtil.randomBoolean(0.5)) {
+//                    childIndividual.randomSwapTwoNumberInMainDiagonal();
+//                }
+//            }
+            for (int x = 0; x < this.dimension; x++) {
+                for (int y = 0; y < this.dimension; y++) {
+                    if (RandomUtil.randomBoolean(0.2)) {
+                        childIndividual.randomSwapWithNeighbor(x, y, this.dimension * this.dimension);
+                    }
                 }
             }
             int compareIndex = RandomUtil.randomInt(0, this.populationSize);
@@ -71,7 +78,7 @@ public class MagicSquareGeneticSolver extends GeneticAlgorithm {
 
     public static void main(String[] args) {
         MagicSquareGeneticSolver magicSquareGeneticSolver =
-                new MagicSquareGeneticSolver(20, 4, 10000);
+                new MagicSquareGeneticSolver(24, 5, 10000);
         magicSquareGeneticSolver.solve();
         System.out.println("Result: ");
         System.out.println(magicSquareGeneticSolver.population.getBestIndividual());

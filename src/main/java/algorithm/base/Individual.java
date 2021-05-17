@@ -1,10 +1,14 @@
 package algorithm.base;
 
 import algorithm.base.operator.FitnessFunction;
+import util.RandomUtil;
 
 import java.util.*;
 
 public class Individual {
+    public final static long FIRST_CREATE_TIME = System.currentTimeMillis();
+    public static long individualCount = 0;
+
     private final int[][] matrix;
     private final FitnessFunction fitnessFunction;
     private long fitness = -1;
@@ -13,11 +17,13 @@ public class Individual {
         this.matrix = new int[n][n];
         this.fitnessFunction = fitnessFunction;
         initMatrix();
+        individualCount++;
     }
 
     public Individual(Individual individual, FitnessFunction fitnessFunction) {
         this.matrix = deepCopy(individual.matrix);
         this.fitnessFunction = fitnessFunction;
+        individualCount++;
     }
 
     public int getValue(int row, int col) {
@@ -100,24 +106,44 @@ public class Individual {
     }
 
     public void randomSwapTwoNumberInRow(int row) {
-        List<Integer> sequence = getRandomSequence(getDimension());
-        swapTwoNumber(row, sequence.get(0), row, sequence.get(getDimension() - 1));
+        int[] indexes = generateTwoRandomIndex(getDimension(), getDimension());
+        swapTwoNumber(row, indexes[0], row, indexes[1]);
     }
 
     public void randomSwapTwoNumberInCol(int col) {
-        List<Integer> sequence = getRandomSequence(getDimension());
-        swapTwoNumber(sequence.get(0), col, sequence.get(getDimension() - 1), col);
+        int[] indexes = generateTwoRandomIndex(getDimension(), getDimension());
+        swapTwoNumber(indexes[0], col, indexes[1], col);
     }
 
     public void randomSwapTwoNumberInMainDiagonal() {
-        List<Integer> sequence = getRandomSequence(getDimension());
-        swapTwoNumber(sequence.get(0), sequence.get(0), sequence.get(getDimension() - 1), sequence.get(getDimension() - 1));
+        int[] indexes = generateTwoRandomIndex(getDimension(), getDimension());
+        swapTwoNumber(indexes[0], indexes[0], indexes[1], indexes[1]);
     }
 
     public void randomSwapTwoNumberInAntiDiagonal() {
-        List<Integer> sequence = getRandomSequence(getDimension());
-        swapTwoNumber(sequence.get(0), getDimension() - sequence.get(0) - 1,
-                sequence.get(getDimension() - 1), getDimension() - sequence.get(getDimension() - 1) - 1);
+        int[] indexes = generateTwoRandomIndex(getDimension(), getDimension());
+        swapTwoNumber(indexes[0], getDimension() - indexes[0] - 1,
+                indexes[1], getDimension() - indexes[1] - 1);
+    }
+
+    public void randomSwapTwoNumberInMatrix() {
+        int[] indexes = generateTwoRandomIndex(getSize(), getSize());
+        swapTwoNumber(indexes[0] / getDimension(), indexes[0] % getDimension(),
+                indexes[1] / getDimension(), indexes[1] % getDimension());
+    }
+
+    public void randomSwapTwoNumberInMatrix(int step) {
+        int[] indexes = generateTwoRandomIndex(step, getSize());
+        swapTwoNumber(indexes[0] / getDimension(), indexes[0] % getDimension(),
+                indexes[1] / getDimension(), indexes[1] % getDimension());
+    }
+
+    public void randomSwapWithNeighbor(int row, int col, int step) {
+        assert step <= getSize();
+        int firstIndex = row * getDimension() + col;
+        int secondIndex = (firstIndex + RandomUtil.randomInt(-step, step + 1) + getSize()) % getSize();
+        swapTwoNumber(firstIndex / getDimension(), firstIndex % getDimension(),
+                secondIndex / getDimension(), secondIndex % getDimension());
     }
 
     public void swapTwoNumber(int rowOne, int colOne, int rowTwo, int colTwo) {
@@ -172,7 +198,14 @@ public class Individual {
         return Arrays.stream(matrix).map(int[]::clone).toArray(int[][]::new);
     }
 
-    private List<Integer> getRandomSequence(int length) {
+    private int[] generateTwoRandomIndex(int range, int clip) {
+        int[] indexes = new int[2];
+        indexes[0] = RandomUtil.randomInt(1, range);
+        indexes[1] = (indexes[0] + RandomUtil.randomInt(1, getDimension())) % clip;
+        return indexes;
+    }
+
+    private List<Integer> generateRandomSequence(int length) {
         List<Integer> list = new ArrayList<>(length);
         for (int i = 0; i < length; i++) {
             list.add(i);
