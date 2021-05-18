@@ -175,6 +175,8 @@ public class Individual {
         int temp = this.matrix[rowOne][colOne];
         this.matrix[rowOne][colOne] = this.matrix[rowTwo][colTwo];
         this.matrix[rowTwo][colTwo] = temp;
+        this.fitness = -1;
+        // TODO: manage fitness
     }
 
     public void swapRow(int rowOne, int rowTwo) {

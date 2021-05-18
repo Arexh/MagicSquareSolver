@@ -3,14 +3,13 @@ package util;
 import java.util.Random;
 
 public class RandomUtil {
+    private final static Random random = new Random();
 
     public static int randomInt(int start, int end) {
-        Random random = new Random(System.nanoTime());
         return start + random.nextInt(end - start);
     }
 
     public static boolean randomBoolean(double probability) {
-        Random random = new Random(System.nanoTime());
         return random.nextDouble() < probability;
     }
 
