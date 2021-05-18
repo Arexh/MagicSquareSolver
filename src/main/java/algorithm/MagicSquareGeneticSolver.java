@@ -113,7 +113,7 @@ public class MagicSquareGeneticSolver extends GeneticAlgorithm {
 
     public static void main(String[] args) {
         MagicSquareGeneticSolver magicSquareGeneticSolver =
-                new MagicSquareGeneticSolver(20, 5, 10000);
+                new MagicSquareGeneticSolver(20, 8, 10000);
         magicSquareGeneticSolver.solve();
         System.out.println("Result: ");
         System.out.println(magicSquareGeneticSolver.population.getBestIndividual());

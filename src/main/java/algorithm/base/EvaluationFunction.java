@@ -23,7 +23,7 @@ public class EvaluationFunction {
         return result;
     }
 
-    private static long calculateMagicConstant(long dimension) {
+    public static long calculateMagicConstant(long dimension) {
         return (dimension * (dimension * dimension + 1)) / 2;
     }
 }
