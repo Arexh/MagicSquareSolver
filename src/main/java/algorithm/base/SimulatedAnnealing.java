@@ -52,6 +52,19 @@ public class SimulatedAnnealing {
                 {9, 13, 0, 15, 0, 0, 0, 11, 3, 0, 7, 2, 14, 0, 0, 1}};
     }
 
+    private static int[][] perfect() {
+        return new int[][]{
+                {1,2,4,9,5,7,3,8,6},
+            {6,8,5,3,4,1,2,9,7},
+            {9,7,3,6,8,2,4,1,5},
+            {4,3,1,2,6,5,9,7,8},
+            {5,6,8,4,7,9,1,3,2},
+            {7,9,2,1,3,8,5,6,4},
+            {2,5,9,7,1,6,8,4,3},
+            {8,4,7,5,9,3,6,2,1},
+            {3,1,6,8,2,4,7,5,9}};
+    }
+
     private static int costFunction(int[][] matrix) {
         int n = matrix.length;
         int result = 0;
@@ -77,8 +90,8 @@ public class SimulatedAnnealing {
     private static int[][] mutate(int[][] matrix, int[][] origin) {
         int n = (int) Math.sqrt(matrix.length);
         int randomIndex = RandomUtil.randomInt(0, matrix.length);
-        int row = 1;
-        int col = 1;
+        int row = (randomIndex / n) * n;
+        int col = (randomIndex % n) * n;
         List<Integer> list = new ArrayList<>();
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
@@ -159,11 +172,15 @@ public class SimulatedAnnealing {
     public static void main(String[] args) {
         int[][] init = testCaseOne();
         int[][] matrix = initMatrix(deepCopy(init));
-        final double alpha = 0.99;
-        double temperature = 1;
-        while (costFunction(matrix) != 2) {
-            System.out.println(costFunction(matrix));
+        final double alpha = 0.999;
+        double temperature = 20;
+        do {
             int[][] next = deepCopy(matrix);
+            mutate(next, init);
+            mutate(next, init);
+            mutate(next, init);
+            mutate(next, init);
+            mutate(next, init);
             mutate(next, init);
             int diff = costFunction(next) - costFunction(matrix);
             double probability = Math.exp(-diff / temperature);
@@ -171,7 +188,7 @@ public class SimulatedAnnealing {
                 matrix = next;
             }
             temperature *= alpha;
-        }
+        } while (costFunction(matrix) != 0);
         printMatrix(matrix);
     }
 }

@@ -3,7 +3,7 @@ package util;
 import java.util.Random;
 
 public class RandomUtil {
-    private final static Random random = new Random();
+    private final static Random random = new Random(System.nanoTime());
 
     public static int randomInt(int start, int end) {
         return start + random.nextInt(end - start);

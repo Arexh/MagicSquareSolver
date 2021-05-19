@@ -141,6 +141,12 @@ public class Individual {
         swapTwoNumber(indexes[0], indexes[0], indexes[1], indexes[1]);
     }
 
+    public void randomSwapTwoNumber() {
+        int a = RandomUtil.randomInt(0, this.size);
+        int b = RandomUtil.randomInt(0, this.size);
+        swapTwoNumber(a, b);
+    }
+
     public void randomSwapTwoNumberInAntiDiagonal() {
         int[] indexes = generateTwoRandomIndex(this.dimension, this.dimension);
         swapTwoNumber(indexes[0], this.dimension - indexes[0] - 1,

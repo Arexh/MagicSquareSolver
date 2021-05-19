@@ -139,11 +139,29 @@ public class MagicSquareGeneticSolver extends GeneticAlgorithm {
         } while (this.population.getBestIndividual().getFitness() != 0);
     }
 
+    public void simulatedAnnealing() {
+        final double alpha = 0.9999;
+        double temperature = 10;
+        Individual individual = new Individual(this.dimension, fitnessFunction);
+        individual.shuffleMatrix();
+        while (individual.getFitness() != 0) {
+            System.out.println(individual.getFitness());
+            Individual childIndividual = new Individual(individual, fitnessFunction);
+            for (int i = 0; i < 2; i++) childIndividual.randomSwapTwoNumber();
+            long diff = childIndividual.getFitness() - individual.getFitness();
+            double probability = Math.exp(-diff / temperature);
+            if (diff < 0 || RandomUtil.randomInt(0, 1) < probability) {
+                individual = childIndividual;
+            }
+            temperature *= alpha;
+        }
+    }
+
     public static void main(String[] args) {
         long start = System.currentTimeMillis();
         MagicSquareGeneticSolver magicSquareGeneticSolver =
-                new MagicSquareGeneticSolver(20, 6, 10000);
-        magicSquareGeneticSolver.solve();
+                new MagicSquareGeneticSolver(1, 20, 10000);
+        magicSquareGeneticSolver.simulatedAnnealing();
         System.out.println("Result: ");
         System.out.println(magicSquareGeneticSolver.population.getBestIndividual());
         System.out.println(System.currentTimeMillis() - start);
