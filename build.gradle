@@ -20,7 +20,6 @@ repositories {
 }
 
 apply plugin: 'java'
-apply plugin: 'org.openjfx.javafxplugin'
 
 dependencies {
     implementation "org.apache.logging.log4j:log4j-api:2.14.0"

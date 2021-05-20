@@ -2,6 +2,10 @@ package algorithm.base;
 
 import util.RandomUtil;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.*;
 
 public class SimulatedAnnealing {
@@ -192,8 +196,32 @@ public class SimulatedAnnealing {
         return Arrays.stream(matrix).map(int[]::clone).toArray(int[][]::new);
     }
 
-    public static void main(String[] args) {
-        int[][] init = testCaseOne();
+    private static int[][] parseStringToMatrix(String input){
+        int[][] matrix = new int[9][9];
+        for(int i = 0; i < input.length(); i++){
+            int num = input.charAt(i) - '0';
+            int row = i / 9;
+            int column = i % 9;
+            matrix[row][column] = num;
+        }
+        return matrix;
+    }
+
+    private static boolean checkAnswer(int[][] matrix, String expected){
+        String result = "";
+        for (int i = 0; i < 9; i++) {
+            for (int j = 0; j < 9; j++){
+                result += matrix[i][j];
+            }
+        }
+        return expected.equals(result);
+    }
+
+    private static void process(String input){
+        String puzzle = input.split(",")[0];
+        String result = input.split(",")[1];
+        int[][] init = parseStringToMatrix(puzzle);
+
         int[][] matrix = initMatrix(deepCopy(init));
         long startTime = System.currentTimeMillis();
         while (costFunction(matrix) != 0) {
@@ -218,6 +246,23 @@ public class SimulatedAnnealing {
             System.out.println(costFunction(matrix));
         }
         printMatrix(matrix);
+        if(checkAnswer(matrix, result))
+            System.out.println("Right!");
         System.out.println(System.currentTimeMillis() - startTime);
+    }
+
+    public static void main(String[] args) throws FileNotFoundException {
+        String csvFile = "src\\main\\java\\algorithm\\base\\test.csv";
+        String line = "";
+        try {
+            BufferedReader bufferedReader = new BufferedReader(new FileReader(csvFile));
+            String head = bufferedReader.readLine();
+            while((line = bufferedReader.readLine()) != null){
+                process(line);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
