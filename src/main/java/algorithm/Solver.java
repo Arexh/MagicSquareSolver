@@ -140,22 +140,27 @@ public class Solver {
         return (dimension * (dimension * dimension + 1)) / 2;
     }
 
+    public static final int DIMENSION = 5;
+    public static final int EVAL_TIMES = 30;
+    public static final double TEMPERATURE = 485760;
+    public static final double ALPHA = 0.872847396394329;
+    public static final int EARLY_STOP = 1201;
+    public static final double SCALE = 0.973968144434559;
+
     // PARAMS: DIMENSION, EVAL_TIMES, TEMPERATURE, ALPHA, EARLY_STOP, SCALE
     public static void main(String[] args) {
-        int DIMENSION = 4;
         long startTime = System.currentTimeMillis();
-        for (int i = 0; i < 30; i++) {
+        for (int i = 0; i < EVAL_TIMES; i++) {
             int size = DIMENSION * DIMENSION;
             int[][] matrix = new int[DIMENSION][DIMENSION];
             do {
-                double temperature = 485760;
-                final double alpha = 0.872847396394329;
-                int count = 1201;
+                double temperature = TEMPERATURE;
+                int count = EARLY_STOP;
                 magicConstant = magicConstant(DIMENSION);
                 initMatrix(matrix);
                 do {
                     int[][] explore = deepCopy(matrix);
-                    mutate(explore, 0.9739681444345593, size);
+                    mutate(explore, SCALE, size);
                     int diff = evaluate(explore) - evaluate(matrix);
                     if (diff < 0 || randomInt(0, 1) < Math.exp(-diff / temperature)) {
                         matrix = explore;
@@ -163,14 +168,14 @@ public class Solver {
                         count--;
                     }
                     if (count == 0) break;
-                    temperature *= alpha;
+                    temperature *= ALPHA;
                 } while(evaluate(matrix) != 0);
-                System.out.println(evaluate(matrix));
+//                System.out.println(evaluate(matrix));
             } while(evaluate(matrix) != 0);
-            printMatrix(matrix);
-            System.out.println(evaluate(matrix));
+//            printMatrix(matrix);
+//            System.out.println(evaluate(matrix));
         }
-        System.out.println(System.currentTimeMillis() - startTime);
-        System.out.println((System.currentTimeMillis() - startTime) / 30.0);
+//        System.out.println(System.currentTimeMillis() - startTime);
+        System.out.println((System.currentTimeMillis() - startTime) / (double) EVAL_TIMES);
     }
 }
