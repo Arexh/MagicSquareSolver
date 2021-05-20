@@ -9,7 +9,7 @@ public class SimulatedAnnealing {
         return new int[][]{
                 {0, 2, 4, 0, 0, 7, 0, 0, 0},
                 {6, 0, 0, 0, 0, 0, 0, 0, 0},
-                {0, 0, 3, 6, 0, 8, 4, 1, 5},
+                {0, 0, 3, 6, 8, 0, 4, 1, 5},
                 {4, 3, 1, 0, 0, 5, 0, 0, 0},
                 {5, 0, 0, 0, 0, 0, 0, 3, 2},
                 {7, 9, 0, 0, 0, 0, 0, 6, 0},
@@ -87,24 +87,47 @@ public class SimulatedAnnealing {
         return result;
     }
 
+//    private static int[][] mutate(int[][] matrix, int[][] origin) {
+//        int n = (int) Math.sqrt(matrix.length);
+//        int randomIndex = RandomUtil.randomInt(0, matrix.length);
+//        int row = (randomIndex / n) * n;
+//        int col = (randomIndex % n) * n;
+//        List<Integer> list = new ArrayList<>();
+//        for (int i = 0; i < n; i++) {
+//            for (int j = 0; j < n; j++) {
+//                int nextRow = row + i;
+//                int nextCol = col + j;
+//                if (origin[nextRow][nextCol] == 0) {
+//                    list.add(nextRow * matrix.length + nextCol);
+//                }
+//            }
+//        }
+//        Collections.shuffle(list);
+//        if (list.size() >= 2) {
+//            swap(matrix, list.get(0), list.get(1));
+//        }
+//        return matrix;
+//    }
+
     private static int[][] mutate(int[][] matrix, int[][] origin) {
         int n = (int) Math.sqrt(matrix.length);
-        int randomIndex = RandomUtil.randomInt(0, matrix.length);
-        int row = (randomIndex / n) * n;
-        int col = (randomIndex % n) * n;
-        List<Integer> list = new ArrayList<>();
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                int nextRow = row + i;
-                int nextCol = col + j;
-                if (origin[nextRow][nextCol] == 0) {
-                    list.add(nextRow * matrix.length + nextCol);
+        for (int randomIndex = 0; randomIndex < matrix.length; randomIndex++) {
+            if (!RandomUtil.randomBoolean(1.0 / matrix.length)) continue;
+            int row = (randomIndex / n) * n;
+            int col = (randomIndex % n) * n;
+            List<Integer> list = new ArrayList<>();
+            for (int i = 0; i < n; i++) {
+                for (int j = 0; j < n; j++) {
+                    int nextRow = row + i;
+                    int nextCol = col + j;
+                    if (origin[nextRow][nextCol] == 0) {
+                        list.add(nextRow * matrix.length + nextCol);
+                    }
                 }
             }
-        }
-        Collections.shuffle(list);
-        if (list.size() >= 2) {
-            swap(matrix, list.get(0), list.get(1));
+            int indexOne = RandomUtil.randomInt(0, list.size());
+            int indexTwo = RandomUtil.randomInt(0, list.size());
+            swap(matrix, list.get(indexOne), list.get(indexTwo));
         }
         return matrix;
     }
@@ -172,23 +195,29 @@ public class SimulatedAnnealing {
     public static void main(String[] args) {
         int[][] init = testCaseOne();
         int[][] matrix = initMatrix(deepCopy(init));
-        final double alpha = 0.999;
-        double temperature = 20;
-        do {
-            int[][] next = deepCopy(matrix);
-            mutate(next, init);
-            mutate(next, init);
-            mutate(next, init);
-            mutate(next, init);
-            mutate(next, init);
-            mutate(next, init);
-            int diff = costFunction(next) - costFunction(matrix);
-            double probability = Math.exp(-diff / temperature);
-            if (diff < 0 || RandomUtil.randomInt(0, 1) < probability) {
-                matrix = next;
-            }
-            temperature *= alpha;
-        } while (costFunction(matrix) != 0);
+        long startTime = System.currentTimeMillis();
+        while (costFunction(matrix) != 0) {
+            matrix = initMatrix(deepCopy(init));
+            final double alpha = 0.99;
+            double temperature = 1000;
+            int count = 10000;
+            do {
+                int[][] next = deepCopy(matrix);
+                mutate(next, init);
+                mutate(next, init);
+                int diff = costFunction(next) - costFunction(matrix);
+                double probability = Math.exp(-diff / temperature);
+                if (diff < 0 || RandomUtil.randomInt(0, 1) < probability) {
+                    matrix = next;
+                } else {
+                    count--;
+                }
+                if (count == 0) break;
+                temperature *= alpha;
+            } while (costFunction(matrix) != 0);
+            System.out.println(costFunction(matrix));
+        }
         printMatrix(matrix);
+        System.out.println(System.currentTimeMillis() - startTime);
     }
 }
