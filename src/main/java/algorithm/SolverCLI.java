@@ -2,7 +2,7 @@ package algorithm;
 
 import java.util.*;
 
-public class Solver {
+public class SolverCLI {
     public static final Random random = new Random();
     private static int magicConstant;
     public static void initMatrix(int[][] matrix) {
@@ -142,35 +142,41 @@ public class Solver {
 
     // PARAMS: DIMENSION, EVAL_TIMES, TEMPERATURE, ALPHA, EARLY_STOP, SCALE
     public static void main(String[] args) {
-        int DIMENSION = 4;
-        long startTime = System.currentTimeMillis();
-        for (int i = 0; i < 30; i++) {
-            int size = DIMENSION * DIMENSION;
-            int[][] matrix = new int[DIMENSION][DIMENSION];
-            do {
-                double temperature = 485760;
-                final double alpha = 0.872847396394329;
-                int count = 1201;
-                magicConstant = magicConstant(DIMENSION);
-                initMatrix(matrix);
+        if (args.length == 6) {
+            final int DIMENSION = Integer.parseInt(args[0]);
+            final int EVAL_TIMES = Integer.parseInt(args[1]);
+            final double TEMPERATURE = Double.parseDouble(args[2]);
+            final double ALPHA = Double.parseDouble(args[3]);
+            final int EARLY_STOP = Integer.parseInt(args[4]);
+            final double SCALE = Double.parseDouble(args[5]);
+            long startTime = System.currentTimeMillis();
+            for (int i = 0; i < EVAL_TIMES; i++) {
+                int size = DIMENSION * DIMENSION;
+                int[][] matrix = new int[DIMENSION][DIMENSION];
                 do {
-                    int[][] explore = deepCopy(matrix);
-                    mutate(explore, 0.9739681444345593, size);
-                    int diff = evaluate(explore) - evaluate(matrix);
-                    if (diff < 0 || randomInt(0, 1) < Math.exp(-diff / temperature)) {
-                        matrix = explore;
-                    } else {
-                        count--;
-                    }
-                    if (count == 0) break;
-                    temperature *= alpha;
+                    double temperature = TEMPERATURE;
+                    int count = EARLY_STOP;
+                    magicConstant = magicConstant(DIMENSION);
+                    initMatrix(matrix);
+                    do {
+                        int[][] explore = deepCopy(matrix);
+                        mutate(explore, SCALE, size);
+                        int diff = evaluate(explore) - evaluate(matrix);
+                        if (diff < 0 || randomInt(0, 1) < Math.exp(-diff / temperature)) {
+                            matrix = explore;
+                        } else {
+                            count--;
+                        }
+                        if (count == 0) break;
+                        temperature *= ALPHA;
+                    } while(evaluate(matrix) != 0);
+//                    System.out.println(evaluate(matrix));
                 } while(evaluate(matrix) != 0);
-                System.out.println(evaluate(matrix));
-            } while(evaluate(matrix) != 0);
-            printMatrix(matrix);
-            System.out.println(evaluate(matrix));
+//                printMatrix(matrix);
+//                System.out.println(evaluate(matrix));
+            }
+//            System.out.println(System.currentTimeMillis() - startTime);
+            System.out.println((System.currentTimeMillis() - startTime) / EVAL_TIMES);
         }
-        System.out.println(System.currentTimeMillis() - startTime);
-        System.out.println((System.currentTimeMillis() - startTime) / 30.0);
     }
 }
