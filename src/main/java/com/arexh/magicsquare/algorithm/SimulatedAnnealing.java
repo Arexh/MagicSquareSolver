@@ -1,6 +1,6 @@
-package algorithm;
+package com.arexh.magicsquare.algorithm;
 
-import util.RandomUtil;
+import com.arexh.magicsquare.util.RandomUtil;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;

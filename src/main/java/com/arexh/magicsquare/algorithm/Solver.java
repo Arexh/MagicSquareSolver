@@ -1,4 +1,4 @@
-package algorithm;
+package com.arexh.magicsquare.algorithm;
 
 import edu.cmu.cs.xfxie.MagicSquareSolver;
 

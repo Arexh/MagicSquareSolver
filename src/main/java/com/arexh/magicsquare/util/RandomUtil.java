@@ -1,4 +1,4 @@
-package util;
+package com.arexh.magicsquare.util;
 
 import java.util.Random;
 
