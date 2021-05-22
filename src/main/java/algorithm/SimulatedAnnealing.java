@@ -1,4 +1,4 @@
-package algorithm.base;
+package algorithm;
 
 import util.RandomUtil;
 
@@ -252,7 +252,7 @@ public class SimulatedAnnealing {
     }
 
     public static void main(String[] args) throws FileNotFoundException {
-        String csvFile = "src\\main\\java\\algorithm\\base\\test.csv";
+        String csvFile = "src/main/resources/test.csv";
         String line = "";
         try {
             BufferedReader bufferedReader = new BufferedReader(new FileReader(csvFile));
