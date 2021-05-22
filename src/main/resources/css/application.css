@@ -1,0 +1,13 @@
+.square {
+    -fx-border-color: dodgerblue;
+    -fx-border-width: 1px;
+}
+.square-text {
+    -fx-font-size: 18px;
+}
+.square-highlight {
+    -fx-background-color:derive(dodgerblue,0.9);
+}
+.square-hover-highlight {
+    -fx-background-color:derive(green,0.9);
+}

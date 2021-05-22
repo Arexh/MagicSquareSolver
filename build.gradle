@@ -8,7 +8,20 @@ repositories {
 apply plugin: 'java'
 
 dependencies {
-    implementation "org.apache.logging.log4j:log4j-api:2.14.0"
-    implementation "org.apache.logging.log4j:log4j-core:2.14.0"
     implementation files('libs/edu.cmu.cs.xfxie.MagicSquareSolver.jar')
+
+    implementation 'org.apache.logging.log4j:log4j-api:2.14.0'
+    implementation 'org.apache.logging.log4j:log4j-core:2.14.0'
+    implementation 'org.greenrobot:eventbus:3.2.0'
+    implementation 'de.schlegel11:jfxanimation:2.0.0'
+    implementation 'de.jensd:fontawesomefx-emojione:2.2.7-2'
+    implementation 'de.jensd:fontawesomefx-fontawesome:4.7.0-5'
+    implementation 'de.jensd:fontawesomefx-icons525:3.0.0-4'
+    implementation 'de.jensd:fontawesomefx-materialdesignfont:1.7.22-4'
+    implementation 'de.jensd:fontawesomefx-materialicons:2.2.0-5'
+    implementation 'de.jensd:fontawesomefx-octicons:4.3.0-5'
+    implementation 'de.jensd:fontawesomefx-weathericons:2.0.10-5'
+    implementation 'de.jensd:fontawesomefx-controls:8.15'
+    implementation 'org.controlsfx:controlsfx:8.40.11'
+    implementation 'com.jfoenix:jfoenix:8.0.10'
 }
