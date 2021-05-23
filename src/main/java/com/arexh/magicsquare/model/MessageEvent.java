@@ -11,6 +11,6 @@ public class MessageEvent {
     }
 
     public enum MessageType {
-        TEST
+        UPDATE_SUDOKU_KEYBOARD,
     }
 }

@@ -1,7 +1,5 @@
 package com.arexh.magicsquare.ui.component;
 
-import javafx.scene.text.Text;
-
 public class SudokuCell extends BasicCell {
 
     private boolean isChangeAble;
@@ -11,15 +9,11 @@ public class SudokuCell extends BasicCell {
         this.column = column;
         this.value = value;
         if (value != 0) {
-            this.text = new Text(String.valueOf(value));
-        } else {
-            this.text = new Text("");
+            setText(String.valueOf(value));
         }
         this.isChangeAble = isChangeAble;
-        this.text.getStyleClass().add("square-text");
         getStyleClass().add("square");
         setOpacity(0.9);
-        getChildren().add(text);
     }
 
     public SudokuCell(int row, int column, int value) {
@@ -31,9 +25,9 @@ public class SudokuCell extends BasicCell {
         if (!isChangeAble) return;
         this.value = value;
         if (this.value != 0) {
-            this.text.setText(String.valueOf(value));
+            setText(String.valueOf(value));
         } else {
-            this.text.setText("");
+            setText("");
         }
     }
 

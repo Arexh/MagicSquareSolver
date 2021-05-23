@@ -1,14 +1,15 @@
 package com.arexh.magicsquare.ui;
 
 import com.arexh.magicsquare.ui.component.SudokuBoard;
+import com.arexh.magicsquare.ui.component.SudokuPlayerKeyBoard;
 import javafx.application.Application;
 import javafx.scene.Scene;
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
 public class App extends Application {
 
-    public static final double WIDTH = 1100;
+    public static final double WIDTH = 1250;
     public static final double HEIGHT = 900;
 
     @Override
@@ -24,9 +25,13 @@ public class App extends Application {
                     {2, 0, 9, 7, 1, 0, 8, 0, 0},
                     {0, 4, 0, 0, 9, 3, 0, 0, 0},
                     {3, 1, 0, 0, 0, 4, 7, 5, 0}});
-            Scene scene = new Scene(sudokuBoard, WIDTH, HEIGHT);
+            SudokuPlayerKeyBoard sudokuPlayerKeyBoard = new SudokuPlayerKeyBoard();
+            sudokuPlayerKeyBoard.setLayoutX(SudokuBoard.SIZE + 120);
+            sudokuPlayerKeyBoard.setLayoutY(200);
+            Pane stackPane = new Pane();
+            stackPane.getChildren().addAll(sudokuBoard, sudokuPlayerKeyBoard);
+            Scene scene = new Scene(stackPane, WIDTH, HEIGHT);
             scene.getStylesheets().add(App.class.getClassLoader().getResource("css/application.css").toExternalForm());
-//            primaryStage.setResizable(false);
             primaryStage.setScene(scene);
             primaryStage.show();
         } catch (Exception e) {

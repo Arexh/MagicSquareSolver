@@ -1,10 +1,8 @@
 package com.arexh.magicsquare.ui.component;
 
-import javafx.scene.layout.StackPane;
-import javafx.scene.text.Text;
+import com.jfoenix.controls.JFXButton;
 
-public class BasicCell extends StackPane {
-    protected Text text;
+public class BasicCell extends JFXButton {
     protected int value;
     protected int row;
     protected int column;
@@ -15,16 +13,14 @@ public class BasicCell extends StackPane {
         this.row = row;
         this.column = column;
         this.value = value;
-        this.text = new Text(String.valueOf(value));
-        this.text.getStyleClass().add("square-text");
         getStyleClass().add("square");
         setOpacity(0.9);
-        getChildren().add(text);
+        setText(String.valueOf(this.value));
     }
 
     public void setValue(int value) {
         this.value = value;
-        this.text.setText(String.valueOf(value));
+        setText(String.valueOf(value));
     }
 
     public int getRow() {

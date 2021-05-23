@@ -1,11 +1,14 @@
 package com.arexh.magicsquare.ui.component;
 
+import com.arexh.magicsquare.model.MessageEvent;
 import javafx.css.PseudoClass;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Line;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -13,12 +16,13 @@ import java.util.Set;
 // ref: https://stackoverflow.com/questions/36369224/creating-an-editable-paintable-grid-in-javafx
 public class SudokuBoard extends StackPane {
     public static final Logger logger = LogManager.getLogger(SudokuBoard.class);
-    private static final int DIMENSION = 3;
-    private static final double SIZE = 800;
-    private static final int LENGTH = DIMENSION * DIMENSION;
-    private static final double GROUP_MARGIN = 18;
-    private static final double SQUARE_MARGIN = 10;
-    private static final double SQUARE_SIZE = (SIZE - (DIMENSION - 1) * GROUP_MARGIN) / LENGTH;
+    public static final int DIMENSION = 3;
+    public static final double SIZE = 800;
+    public static final int LENGTH = DIMENSION * DIMENSION;
+    public static final double GROUP_MARGIN = 18;
+    public static final double SQUARE_MARGIN = 10;
+    public static final double SQUARE_SIZE = (SIZE - (DIMENSION - 1) * GROUP_MARGIN) / LENGTH;
+    private SudokuCell selectedCell;
     private SudokuCell[][] cells;
     private Pane[] rowPanes;
     private Pane[] columnPanes;
@@ -30,6 +34,7 @@ public class SudokuBoard extends StackPane {
     private Pane errorCountPane;
 
     public SudokuBoard(int[][] square) {
+        EventBus.getDefault().register(this);
         this.cells = new SudokuCell[LENGTH][LENGTH];
         this.rowPanes = new Pane[LENGTH];
         this.columnPanes = new Pane[LENGTH];
@@ -47,6 +52,18 @@ public class SudokuBoard extends StackPane {
         getChildren().add(errorCountPane);
         getChildren().add(backgroundPane);
         getChildren().add(squarePane);
+    }
+
+    @Subscribe
+    public void onMessageEvent(MessageEvent event) {
+        switch (event.messageType) {
+            case UPDATE_SUDOKU_KEYBOARD:
+                int value = (int) event.messageContent;
+                if (selectedCell != null) {
+                    updateValue(selectedCell.getRow(), selectedCell.getColumn(), value);
+                }
+                break;
+        }
     }
 
     private void initBackground() {
@@ -137,6 +154,7 @@ public class SudokuBoard extends StackPane {
         int offset = 0;
         for (int i = 0; i < LENGTH; i++) {
             BasicCell errorPane = new BasicCell(0, 0, 0);
+            errorPane.setDisable(true);
             columnErrorPanes[i] = errorPane;
             errorPane.setLayoutY(SIZE + GROUP_MARGIN);
             errorPane.setLayoutX(i * SQUARE_SIZE + SQUARE_MARGIN + offset);
@@ -148,6 +166,7 @@ public class SudokuBoard extends StackPane {
         offset = 0;
         for (int i = 0; i < LENGTH; i++) {
             BasicCell errorPane = new BasicCell(0, 0, 0);
+            errorPane.setDisable(true);
             rowErrorPanes[i] = errorPane;
             errorPane.setLayoutX(SIZE + GROUP_MARGIN);
             errorPane.setLayoutY(i * SQUARE_SIZE + SQUARE_MARGIN + offset);
