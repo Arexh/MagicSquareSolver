@@ -17,10 +17,10 @@ import java.util.Set;
 public class SudokuBoard extends StackPane {
     public static final Logger logger = LogManager.getLogger(SudokuBoard.class);
     public static final int DIMENSION = 3;
-    public static final double SIZE = 800;
+    public static final double SIZE = 550;
     public static final int LENGTH = DIMENSION * DIMENSION;
-    public static final double GROUP_MARGIN = 18;
-    public static final double SQUARE_MARGIN = 10;
+    public static final double GROUP_MARGIN = 8;
+    public static final double SQUARE_MARGIN = 4;
     public static final double SQUARE_SIZE = (SIZE - (DIMENSION - 1) * GROUP_MARGIN) / LENGTH;
     private SudokuCell selectedCell;
     private SudokuCell[][] cells;
@@ -140,14 +140,20 @@ public class SudokuBoard extends StackPane {
         Line lineTwo = new Line(0, DIMENSION * SQUARE_SIZE + GROUP_MARGIN / 2, SIZE, DIMENSION * SQUARE_SIZE + GROUP_MARGIN / 2);
         Line lineThree = new Line(0, DIMENSION * SQUARE_SIZE * 2 + GROUP_MARGIN * 1.5, SIZE, DIMENSION * SQUARE_SIZE * 2 + GROUP_MARGIN * 1.5);
         Line lineFour = new Line(DIMENSION * SQUARE_SIZE * 2 + GROUP_MARGIN * 1.5, 0, DIMENSION * SQUARE_SIZE * 2 + GROUP_MARGIN * 1.5, SIZE);
+        Line lineFive = new Line(0, 0, 0, SIZE);
+        Line lineSix = new Line(0, 0, SIZE, 0);
+        Line lineSeven = new Line(0, SIZE, SIZE, SIZE);
+        Line lineEight = new Line(SIZE, 0, SIZE, SIZE);
         lineOne.getStyleClass().add("suduku-board-line");
         lineTwo.getStyleClass().add("suduku-board-line");
         lineThree.getStyleClass().add("suduku-board-line");
         lineFour.getStyleClass().add("suduku-board-line");
-        squarePane.getChildren().add(lineOne);
-        squarePane.getChildren().add(lineTwo);
-        squarePane.getChildren().add(lineThree);
-        squarePane.getChildren().add(lineFour);
+        lineFive.getStyleClass().add("suduku-board-line");
+        lineSix.getStyleClass().add("suduku-board-line");
+        lineSeven.getStyleClass().add("suduku-board-line");
+        lineEight.getStyleClass().add("suduku-board-line");
+        squarePane.getChildren().addAll(lineOne, lineTwo, lineThree, lineFour,
+                lineFive, lineSix, lineSeven, lineEight);
     }
 
     private void initErrorCount() {
@@ -186,16 +192,9 @@ public class SudokuBoard extends StackPane {
     }
 
     private void configCellEventHandler(SudokuCell cell) {
-        cell.hoverProperty().addListener((observableValue, oldValue, newValue) -> {
-            if (newValue) {
-                cell.hoverHighlight();
-            } else {
-                cell.hoverUnhighlight();
-            }
-        });
         cell.setOnMousePressed(event -> {
             if (event.isPrimaryButtonDown()) {
-                updateValue(cell.getRow(), cell.getColumn(), 1);
+                setSelected(cell.getRow(), cell.getColumn());
             }
             if (event.isSecondaryButtonDown()) {
                 updateValue(cell.getRow(), cell.getColumn(), 0);
@@ -287,5 +286,14 @@ public class SudokuBoard extends StackPane {
 
     public void unHighlightSubSquare(int i, int j) {
         subSquarePanes[i][j].pseudoClassStateChanged(PseudoClass.getPseudoClass("highlight"), false);
+    }
+
+    public void setSelected(int row, int column) {
+        logger.debug("setSelected: " + row + ", " + column);
+        if (this.selectedCell != null && this.selectedCell != this.cells[row][column]) {
+            this.selectedCell.pseudoClassStateChanged(PseudoClass.getPseudoClass("selected"), false);
+        }
+        this.selectedCell = this.cells[row][column];
+        this.selectedCell.pseudoClassStateChanged(PseudoClass.getPseudoClass("selected"), true);
     }
 }
