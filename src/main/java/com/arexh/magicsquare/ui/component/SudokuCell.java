@@ -1,16 +1,12 @@
 package com.arexh.magicsquare.ui.component;
 
-import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 
-public class SudokuCell extends StackPane {
+public class SudokuCell extends BasicCell {
 
-    private Text text;
-    private int value;
-    private int row;
-    private int column;
+    private boolean isChangeAble;
 
-    public SudokuCell(int row, int column, int value) {
+    public SudokuCell(int row, int column, int value, boolean isChangeAble) {
         this.row = row;
         this.column = column;
         this.value = value;
@@ -19,31 +15,26 @@ public class SudokuCell extends StackPane {
         } else {
             this.text = new Text("");
         }
+        this.isChangeAble = isChangeAble;
         this.text.getStyleClass().add("square-text");
         getStyleClass().add("square");
         setOpacity(0.9);
         getChildren().add(text);
     }
 
+    public SudokuCell(int row, int column, int value) {
+        this(row, column, value, value == 0);
+    }
+
+    @Override
     public void setValue(int value) {
+        if (!isChangeAble) return;
         this.value = value;
         if (this.value != 0) {
             this.text.setText(String.valueOf(value));
         } else {
             this.text.setText("");
         }
-    }
-
-    public int getRow() {
-        return row;
-    }
-
-    public int getColumn() {
-        return column;
-    }
-
-    public int getValue() {
-        return value;
     }
 
     public void hoverHighlight() {

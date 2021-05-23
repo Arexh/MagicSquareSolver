@@ -23,24 +23,28 @@ public class SudokuBoard extends StackPane {
     private Pane[] rowPanes;
     private Pane[] columnPanes;
     private Pane[][] subSquarePanes;
+    private BasicCell[] rowErrorPanes;
+    private BasicCell[] columnErrorPanes;
     private Pane squarePane;
     private Pane backgroundPane;
+    private Pane errorCountPane;
 
     public SudokuBoard(int[][] square) {
         this.cells = new SudokuCell[LENGTH][LENGTH];
         this.rowPanes = new Pane[LENGTH];
         this.columnPanes = new Pane[LENGTH];
         this.subSquarePanes = new Pane[DIMENSION][DIMENSION];
+        this.rowErrorPanes = new BasicCell[LENGTH];
+        this.columnErrorPanes = new BasicCell[LENGTH];
         this.squarePane = new Pane();
         this.backgroundPane = new Pane();
+        this.errorCountPane = new Pane();
         initBackground();
         initCell(square);
         initLine();
+        initErrorCount();
         configCellEventHandler();
-        setHeight(SIZE);
-        setWidth(SIZE);
-        System.out.println(getHeight());
-        System.out.println(getWidth());
+        getChildren().add(errorCountPane);
         getChildren().add(backgroundPane);
         getChildren().add(squarePane);
     }
@@ -129,6 +133,31 @@ public class SudokuBoard extends StackPane {
         squarePane.getChildren().add(lineFour);
     }
 
+    private void initErrorCount() {
+        int offset = 0;
+        for (int i = 0; i < LENGTH; i++) {
+            BasicCell errorPane = new BasicCell(0, 0, 0);
+            columnErrorPanes[i] = errorPane;
+            errorPane.setLayoutY(SIZE + GROUP_MARGIN);
+            errorPane.setLayoutX(i * SQUARE_SIZE + SQUARE_MARGIN + offset);
+            errorPane.setPrefWidth(SQUARE_SIZE - 2 * SQUARE_MARGIN);
+            errorPane.setPrefHeight(SQUARE_SIZE - 2 * SQUARE_MARGIN);
+            squarePane.getChildren().add(errorPane);
+            if ((i + 1) % DIMENSION == 0) offset += GROUP_MARGIN;
+        }
+        offset = 0;
+        for (int i = 0; i < LENGTH; i++) {
+            BasicCell errorPane = new BasicCell(0, 0, 0);
+            rowErrorPanes[i] = errorPane;
+            errorPane.setLayoutX(SIZE + GROUP_MARGIN);
+            errorPane.setLayoutY(i * SQUARE_SIZE + SQUARE_MARGIN + offset);
+            errorPane.setPrefWidth(SQUARE_SIZE - 2 * SQUARE_MARGIN);
+            errorPane.setPrefHeight(SQUARE_SIZE - 2 * SQUARE_MARGIN);
+            squarePane.getChildren().add(errorPane);
+            if ((i + 1) % DIMENSION == 0) offset += GROUP_MARGIN;
+        }
+    }
+
     private void configCellEventHandler() {
         for (int i = 0; i < LENGTH; i++) {
             for (int j = 0; j < LENGTH; j++) {
@@ -166,64 +195,73 @@ public class SudokuBoard extends StackPane {
         for (int i = 0; i < DIMENSION; i++) {
             for (int j = 0; j < DIMENSION; j++) {
                 Set<Integer> squareSet = new HashSet<>();
-                a: for (int x = 0; x < DIMENSION; x++) {
+                int errorNum = 0;
+                for (int x = 0; x < DIMENSION; x++) {
                     for (int y = 0; y < DIMENSION; y++) {
                         int r = i * DIMENSION + x;
                         int c = j * DIMENSION + y;
                         if (squareSet.contains(cells[r][c].getValue())) {
-                            highlightSubSquare(i, j);
-                            break a;
+                            highlightSubSquare(i, j, errorNum);
+                            errorNum++;
                         } else if (cells[r][c].getValue() != 0) {
                             squareSet.add(cells[r][c].getValue());
                         }
-                        if (x == DIMENSION - 1 && y == DIMENSION - 1) unHighlightSubSquare(i, j);
                     }
                 }
+                if (errorNum == 0) unHighlightSubSquare(i, j);
+                else highlightSubSquare(i, j, errorNum);
             }
         }
         for (int i = 0; i < LENGTH; i++) {
             Set<Integer> rowSet = new HashSet<>();
             Set<Integer> columnSet = new HashSet<>();
+            int errorNum = 0;
             for (int j = 0; j < LENGTH; j++) {
                 if (rowSet.contains(cells[i][j].getValue())) {
-                    highlightRow(i);
-                    break;
+                    errorNum++;
                 } else if (cells[i][j].getValue() != 0) {
                     rowSet.add(cells[i][j].getValue());
                 }
-                if (j == DIMENSION - 1) unHighlightRow(i);
             }
+            if (errorNum == 0) unHighlightRow(i);
+            else highlightRow(i, errorNum);
+            errorNum = 0;
             for (int j = 0; j < LENGTH; j++) {
                 if (columnSet.contains(cells[j][i].getValue())) {
-                    highlightColumn(i);
-                    break;
+                    errorNum++;
                 } else if (cells[j][i].getValue() != 0) {
                     columnSet.add(cells[j][i].getValue());
                 }
                 if (j == DIMENSION - 1) unHighlightColumn(i);
             }
+            if (errorNum == 0) unHighlightColumn(i);
+            else highlightColumn(i, errorNum);
         }
     }
 
-    public void highlightRow(int row) {
+    public void highlightRow(int row, int errorNum) {
         logger.debug("[ROW ERROR] Row: " + row);
         rowPanes[row].pseudoClassStateChanged(PseudoClass.getPseudoClass("highlight"), true);
+        rowErrorPanes[row].setValue(errorNum);
     }
 
     public void unHighlightRow(int row) {
         rowPanes[row].pseudoClassStateChanged(PseudoClass.getPseudoClass("highlight"), false);
+        rowErrorPanes[row].setValue(0);
     }
 
-    public void highlightColumn(int column) {
+    public void highlightColumn(int column, int errorNum) {
         logger.debug("[COLUMN ERROR] Column: " + column);
         columnPanes[column].pseudoClassStateChanged(PseudoClass.getPseudoClass("highlight"), true);
+        columnErrorPanes[column].setValue(errorNum);
     }
 
     public void unHighlightColumn(int column) {
         columnPanes[column].pseudoClassStateChanged(PseudoClass.getPseudoClass("highlight"), false);
+        columnErrorPanes[column].setValue(0);
     }
 
-    public void highlightSubSquare(int i, int j) {
+    public void highlightSubSquare(int i, int j, int errorNum) {
         logger.debug("[SUB SQUARE ERROR] X: " + i + ", Y: " + j);
         subSquarePanes[i][j].pseudoClassStateChanged(PseudoClass.getPseudoClass("highlight"), true);
     }

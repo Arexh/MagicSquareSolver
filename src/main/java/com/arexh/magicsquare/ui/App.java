@@ -9,7 +9,7 @@ import javafx.stage.Stage;
 public class App extends Application {
 
     public static final double WIDTH = 1100;
-    public static final double HEIGHT = 800;
+    public static final double HEIGHT = 900;
 
     @Override
     public void start(Stage primaryStage) {
