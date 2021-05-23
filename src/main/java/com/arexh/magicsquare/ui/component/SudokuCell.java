@@ -1,6 +1,6 @@
 package com.arexh.magicsquare.ui.component;
 
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 
 public class SudokuCell extends StackPane {
@@ -14,11 +14,24 @@ public class SudokuCell extends StackPane {
         this.row = row;
         this.column = column;
         this.value = value;
-        this.text = new Text(String.valueOf(value));
+        if (value != 0) {
+            this.text = new Text(String.valueOf(value));
+        } else {
+            this.text = new Text("");
+        }
         this.text.getStyleClass().add("square-text");
         getStyleClass().add("square");
         setOpacity(0.9);
         getChildren().add(text);
+    }
+
+    public void setValue(int value) {
+        this.value = value;
+        if (this.value != 0) {
+            this.text.setText(String.valueOf(value));
+        } else {
+            this.text.setText("");
+        }
     }
 
     public int getRow() {
@@ -29,13 +42,8 @@ public class SudokuCell extends StackPane {
         return column;
     }
 
-    public void highlight() {
-        getStyleClass().remove("square-highlight");
-        getStyleClass().add("square-highlight");
-    }
-
-    public void unHighlight() {
-        getStyleClass().remove("square-highlight");
+    public int getValue() {
+        return value;
     }
 
     public void hoverHighlight() {
@@ -45,5 +53,14 @@ public class SudokuCell extends StackPane {
 
     public void hoverUnhighlight() {
         getStyleClass().remove("square-hover-highlight");
+    }
+
+    public void clickedHighlight() {
+        getStyleClass().remove("square-click");
+        getStyleClass().add("square-click");
+    }
+
+    public void clickedUnHighlight() {
+        getStyleClass().remove("square-click");
     }
 }
