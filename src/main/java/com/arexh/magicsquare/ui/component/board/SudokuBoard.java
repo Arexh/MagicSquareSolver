@@ -1,6 +1,8 @@
-package com.arexh.magicsquare.ui.component;
+package com.arexh.magicsquare.ui.component.board;
 
 import com.arexh.magicsquare.model.MessageEvent;
+import com.arexh.magicsquare.ui.component.cell.BasicCell;
+import com.arexh.magicsquare.ui.component.cell.SudokuCell;
 import javafx.css.PseudoClass;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;

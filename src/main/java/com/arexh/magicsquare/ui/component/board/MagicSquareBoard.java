@@ -1,13 +1,15 @@
-package com.arexh.magicsquare.ui.component;
+package com.arexh.magicsquare.ui.component.board;
 
 import com.arexh.magicsquare.algorithm.HelperFunction;
+import com.arexh.magicsquare.algorithm.MagicSquareSolver;
+import com.arexh.magicsquare.ui.component.cell.BasicCell;
+import com.arexh.magicsquare.ui.component.cell.MagicSquareSumCell;
+import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXSlider;
+import javafx.application.Platform;
 import javafx.scene.CacheHint;
 import javafx.scene.SnapshotParameters;
-import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.DataFormat;
-import javafx.scene.input.Dragboard;
-import javafx.scene.input.TransferMode;
+import javafx.scene.input.*;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 
@@ -19,17 +21,20 @@ public class MagicSquareBoard extends Pane {
     public static final double CELL_MAX_SIZE = 40;
     public static final double CELL_MAX_WIDTH = 50;
 
+
+    private final int[][] algorithmSquare;
     private final BasicCell[][] cells;
     private final int[][] square;
     private int dimension;
     private int magicConstant;
     private BasicCell draggedCell;
+    private boolean isAlgorithmRunning;
 
-    public MagicSquareBoard(int dimension) {
-        dimension += 2;
-        this.dimension = dimension;
-        this.square = new int[dimension][dimension];
-        this.cells = new BasicCell[dimension][dimension];
+    public MagicSquareBoard() {
+        this.dimension = MAX_DIMENSION;
+        this.square = new int[MAX_DIMENSION][MAX_DIMENSION];
+        this.cells = new BasicCell[MAX_DIMENSION][MAX_DIMENSION];
+        this.algorithmSquare = new int[MAX_DIMENSION][MAX_DIMENSION];
 
         setCache(true);
         setCacheShape(true);
@@ -40,6 +45,32 @@ public class MagicSquareBoard extends Pane {
         initMagicConstant();
         updateSumCell();
         initSlider();
+        JFXButton startAlgorithm = new JFXButton("Algorithm");
+        startAlgorithm.getStyleClass().add("sudoku-back-button");
+        startAlgorithm.setLayoutX(SIZE + 20);
+        startAlgorithm.setLayoutY(200);
+        startAlgorithm.setOnMouseClicked(event -> {
+            startAlgorithm.setDisable(true);
+            new Thread(() -> {
+                MagicSquareSolver magicSquareSolver = new MagicSquareSolver(dimension - 2, new edu.cmu.cs.xfxie.MagicSquareSolver.AlgorithmCallBack() {
+                    @Override
+                    public void onAlgorithmReheat() {
+                        System.out.println("Reheated");
+                    }
+
+                    @Override
+                    public void onSquareChanged(int[][] square) {
+                        setAlgorithmSquare(square);
+                        Platform.runLater(() -> {
+                            setSquare(MagicSquareBoard.this.algorithmSquare);
+                        });
+                    }
+                });
+                magicSquareSolver.run();
+                startAlgorithm.setDisable(false);
+            }).start();
+        });
+        getChildren().add(startAlgorithm);
     }
 
     private void initSlider() {
@@ -124,6 +155,7 @@ public class MagicSquareBoard extends Pane {
         for (int i = 0; i < dimension - 2; i++) {
             for (int j = 0; j < dimension - 2; j++) {
                 this.square[i][j] = count++;
+                this.algorithmSquare[i][j] = square[i][j];
             }
         }
     }
@@ -178,6 +210,24 @@ public class MagicSquareBoard extends Pane {
         cell.setOnDragDone(event -> {
             updateSumCell();
         });
+    }
+
+    private void setSquare(int[][] square) {
+        for (int i = 1; i < dimension - 1; i++) {
+            for (int j = 1; j < dimension - 1; j++) {
+                this.square[i - 1][j - 1] = square[i - 1][j - 1];
+                this.cells[i][j].setValue(square[i - 1][j - 1]);
+            }
+        }
+        updateSumCell();
+    }
+
+    private void setAlgorithmSquare(int[][] square) {
+        for (int i = 0; i < dimension - 2; i++) {
+            for (int j = 0; j < dimension - 2; j++) {
+                this.algorithmSquare[i][j] = square[i][j];
+            }
+        }
     }
 
     private void initMagicConstant() {

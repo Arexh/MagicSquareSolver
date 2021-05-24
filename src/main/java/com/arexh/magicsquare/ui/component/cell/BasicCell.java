@@ -1,4 +1,4 @@
-package com.arexh.magicsquare.ui.component;
+package com.arexh.magicsquare.ui.component.cell;
 
 import javafx.css.PseudoClass;
 import javafx.scene.layout.StackPane;

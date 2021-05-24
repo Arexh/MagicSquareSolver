@@ -1,8 +1,8 @@
 package com.arexh.magicsquare.ui;
 
-import com.arexh.magicsquare.ui.component.MagicSquareBoard;
-import com.arexh.magicsquare.ui.component.SudokuBoard;
-import com.arexh.magicsquare.ui.component.SudokuPlayerKeyBoard;
+import com.arexh.magicsquare.ui.component.board.MagicSquareBoard;
+import com.arexh.magicsquare.ui.component.board.SudokuBoard;
+import com.arexh.magicsquare.ui.component.board.SudokuPlayerKeyBoard;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
@@ -27,7 +27,7 @@ public class App extends Application {
 
     private Scene magicSquareScene() {
         Pane pane = new Pane();
-        pane.getChildren().add(new MagicSquareBoard(20));
+        pane.getChildren().add(new MagicSquareBoard());
         Scene scene = new Scene(pane, WIDTH, HEIGHT);
         scene.getStylesheets().add(Objects.requireNonNull(App.class.getClassLoader().getResource("css/application.css")).toExternalForm());
         return scene;

@@ -1,4 +1,4 @@
-package com.arexh.magicsquare.ui.component;
+package com.arexh.magicsquare.ui.component.board;
 
 import com.arexh.magicsquare.model.MessageEvent;
 import com.jfoenix.controls.JFXButton;

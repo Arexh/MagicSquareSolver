@@ -1,4 +1,4 @@
-package com.arexh.magicsquare.ui.component;
+package com.arexh.magicsquare.ui.component.cell;
 
 import javafx.scene.text.Text;
 
