@@ -28,6 +28,7 @@ public class MagicSquareBoard extends Pane {
     public static int MIN_UPDATE_INTERVAL = 100;
     public static int MAX_UPDATE_INTERVAL = 2000;
 
+    private final List<BasicCell> selectedList;
     private final int[][] algorithmSquare;
     private final BasicCell[][] cells;
     private final int[][] square;
@@ -39,7 +40,6 @@ public class MagicSquareBoard extends Pane {
     private boolean isAlgorithmPaused;
     private int updateInterval = MIN_UPDATE_INTERVAL;
     private boolean selectedMode;
-    private SortedSet<BasicCell> selectedSet;
 
     private JFXButton runAlgorithmBtn;
     private JFXButton pauseAlgorithmBtn;
@@ -69,14 +69,7 @@ public class MagicSquareBoard extends Pane {
         this.square = new int[MAX_DIMENSION][MAX_DIMENSION];
         this.cells = new BasicCell[MAX_DIMENSION][MAX_DIMENSION];
         this.algorithmSquare = new int[MAX_DIMENSION][MAX_DIMENSION];
-        this.selectedSet = new TreeSet<>((o1, o2) -> {
-            if ((o1.getRow() < o2.getRow() || (o1.getRow() == o2.getRow() && o1.getColumn() < o2.getColumn())))
-                return -1;
-            else if (o1.getRow() == o2.getRow() && o1.getColumn() == o2.getColumn())
-                return 0;
-            else
-                return 1;
-        });
+        this.selectedList = new ArrayList<>();
 
         setCache(true);
         setCacheShape(true);
@@ -175,10 +168,12 @@ public class MagicSquareBoard extends Pane {
         constrainBtn.selectedProperty().addListener(((observable, oldValue, newValue) -> {
             if (newValue) {
                 lockConstrain();
-                this.curWidth = 1;
-                this.curHeight = 1;
-                filterInvalidSelectedCell(selectedSet.first(), 1, 1);
-                System.out.println(this.curHeight + ", " + this.curWidth);
+                this.curWidth = 0;
+                this.curHeight = 0;
+                if (selectedList.size() == 0) return;
+                sortSelectedList();
+                detectSelectedSquare(selectedList.get(0), 1, 1);
+                removeInvalidCell(selectedList, this.curWidth, this.curHeight);
             } else {
                 unlockConstrain();
             }
@@ -188,25 +183,41 @@ public class MagicSquareBoard extends Pane {
                 stopAlgorithmBtn, infiniteLoopBtn, constrainBtn);
     }
 
-    private void filterInvalidSelectedCell(BasicCell cell, int width, int height) {
+    private void removeInvalidCell(List<BasicCell> list, int width, int height) {
+        BasicCell cell = list.get(0);
+        int row = cell.getRow() + 1;
+        int column = cell.getColumn() + 1;
+        for (int i = list.size() - 1; i > 0; i--) {
+            BasicCell tempCell = list.get(i);
+            if (tempCell.getRow() + 1 < row || tempCell.getRow() + 1 >= row + height ||
+            tempCell.getColumn() + 1 < column || tempCell.getColumn() + 1 >= column + width) {
+                ((MagicSquareCell) tempCell).unSelect();
+                list.remove(tempCell);
+            }
+        }
+    }
+
+    private void detectSelectedSquare(BasicCell cell, int width, int height) {
         if (width >= dimension - 1 || height >= dimension - 1) return;
         boolean flag = true;
-        int row = cell.getRow();
-        int column = cell.getColumn();
+        int row = cell.getRow() + 1;
+        int column = cell.getColumn() + 1;
         for (int i = row; i < row + height; i++) {
-            for (int j = 0; j < column + width; j++) {
-                if (!selectedSet.contains(this.cells[i][j])) {
+            for (int j = column; j < column + width; j++) {
+                if (!selectedList.contains(this.cells[i][j])) {
                     flag = false;
                     break;
                 }
             }
         }
         if (flag) {
-            this.curWidth = Math.max(this.curWidth, width);
-            this.curHeight = Math.max(this.curHeight, height);
-            filterInvalidSelectedCell(cell, width, height + 1);
-            filterInvalidSelectedCell(cell, width + 1, height);
-            filterInvalidSelectedCell(cell, width + 1, height + 1);
+            if (width * height > this.curWidth * this.curHeight) {
+                this.curWidth = width;
+                this.curHeight = height;
+            }
+            detectSelectedSquare(cell, width, height + 1);
+            detectSelectedSquare(cell, width + 1, height);
+            detectSelectedSquare(cell, width + 1, height + 1);
         }
     }
 
@@ -413,11 +424,11 @@ public class MagicSquareBoard extends Pane {
             if (this.selectedMode) {
                 if (event.isPrimaryButtonDown()) {
                     ((MagicSquareCell) cell).select();
-                    selectedSet.add((MagicSquareCell) cell);
+                    selectedList.add(cell);
                 }
                 if (event.isSecondaryButtonDown()) {
                     ((MagicSquareCell) cell).unSelect();
-                    selectedSet.remove((MagicSquareCell) cell);
+                    selectedList.remove(cell);
                 }
             }
         });
@@ -443,5 +454,16 @@ public class MagicSquareBoard extends Pane {
 
     private void initMagicConstant() {
         this.magicConstant = HelperFunction.magicConstant(this.dimension - 2);
+    }
+
+    private void sortSelectedList() {
+        this.selectedList.sort((o1, o2) -> {
+            if ((o1.getRow() < o2.getRow() || (o1.getRow() == o2.getRow() && o1.getColumn() < o2.getColumn())))
+                return -1;
+            else if (o1.getRow() == o2.getRow() && o1.getColumn() == o2.getColumn())
+                return 0;
+            else
+                return 1;
+        });
     }
 }
