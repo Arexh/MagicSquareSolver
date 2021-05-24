@@ -8,7 +8,7 @@
 }
 
 .square:selected {
-    -fx-background-color: #ffe8e8e4;
+    -fx-background-color: #ffd166aa !important;
 }
 
 .square:hover {
