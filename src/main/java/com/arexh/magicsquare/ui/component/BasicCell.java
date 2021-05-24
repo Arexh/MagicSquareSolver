@@ -1,5 +1,6 @@
 package com.arexh.magicsquare.ui.component;
 
+import javafx.css.PseudoClass;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
 
@@ -18,7 +19,6 @@ public class BasicCell extends StackPane {
         this.text = new Text(String.valueOf(value));
         configEvent();
         getStyleClass().add("square");
-        setOpacity(0.9);
         getChildren().add(this.text);
     }
 
@@ -50,11 +50,10 @@ public class BasicCell extends StackPane {
     }
 
     public void hoverHighlight() {
-        getStyleClass().remove("square-hover-highlight");
-        getStyleClass().add("square-hover-highlight");
+        pseudoClassStateChanged(PseudoClass.getPseudoClass("hover"), true);
     }
 
     public void hoverUnhighlight() {
-        getStyleClass().remove("square-hover-highlight");
+        pseudoClassStateChanged(PseudoClass.getPseudoClass("hover"), false);
     }
 }
