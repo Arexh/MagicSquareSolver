@@ -3,19 +3,27 @@ package com.arexh.magicsquare.ui.component;
 import com.arexh.magicsquare.algorithm.HelperFunction;
 import com.jfoenix.controls.JFXSlider;
 import javafx.scene.CacheHint;
+import javafx.scene.SnapshotParameters;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.DataFormat;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 
 public class MagicSquareBoard extends Pane {
+    private static final DataFormat JAVA_FORMAT = new DataFormat("application/x-java-serialized-object");
     public static final int MAX_DIMENSION = 22;
     public static final double SIZE = 650;
     public static final double MARGIN_PROP = 0;
     public static final double CELL_MAX_SIZE = 40;
     public static final double CELL_MAX_WIDTH = 50;
 
-    private BasicCell[][] cells;
-    private int[][] square;
+    private final BasicCell[][] cells;
+    private final int[][] square;
     private int dimension;
     private int magicConstant;
+    private BasicCell draggedCell;
 
     public MagicSquareBoard(int dimension) {
         dimension += 2;
@@ -35,7 +43,7 @@ public class MagicSquareBoard extends Pane {
     }
 
     private void initSlider() {
-        JFXSlider slider = new JFXSlider(3, 20, 0);
+        JFXSlider slider = new JFXSlider(3, 20, 20);
         slider.setLayoutX(SIZE + 15);
         slider.setLayoutY(100);
         slider.setPrefWidth(150);
@@ -130,6 +138,7 @@ public class MagicSquareBoard extends Pane {
                     cell = new MagicSquareSumCell();
                 } else {
                     cell = new BasicCell(i - 1, j - 1, square[i - 1][j - 1]);
+                    configDragEvent(cell);
                 }
                 this.cells[i][j] = cell;
                 cell.setLayoutY(i * averageSize + margin);
@@ -139,6 +148,36 @@ public class MagicSquareBoard extends Pane {
                 getChildren().add(cell);
             }
         }
+    }
+
+    private void configDragEvent(BasicCell cell) {
+        cell.setOnDragDetected(event -> {
+            draggedCell = cell;
+            Dragboard db = cell.startDragAndDrop(TransferMode.MOVE);
+            ClipboardContent content = new ClipboardContent();
+            content.put(JAVA_FORMAT, draggedCell.getValue());
+            db.setContent(content);
+            SnapshotParameters parameters = new SnapshotParameters();
+            parameters.setFill(Color.TRANSPARENT);
+            db.setDragView(cell.snapshot(parameters, null));
+            event.consume();
+        });
+        cell.setOnDragOver(event -> {
+            if (!event.getDragboard().hasContent(JAVA_FORMAT)) return;
+            if (draggedCell.getValue() == cell.getValue()) return;
+            event.acceptTransferModes(TransferMode.MOVE);
+        });
+        cell.setOnDragDropped(event -> {
+            int temp = draggedCell.getValue();
+            draggedCell.setValue(cell.getValue());
+            cell.setValue(temp);
+            this.square[draggedCell.getRow()][draggedCell.getColumn()] = draggedCell.getValue();
+            this.square[cell.getRow()][cell.getColumn()] = cell.getValue();
+            event.setDropCompleted(true);
+        });
+        cell.setOnDragDone(event -> {
+            updateSumCell();
+        });
     }
 
     private void initMagicConstant() {
