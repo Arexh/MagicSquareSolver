@@ -26,12 +26,12 @@ public class MagicSquareSolver extends AlgorithmSolver {
         AlgorithmCallBack algorithmCallBack = new AlgorithmCallBack() {
             @Override
             public void onAlgorithmReheat() {
-                callBack.onReheat();
+                if (callBack != null) callBack.onReheat();
             }
 
             @Override
             public void onSquareChanged(int[][] square) {
-                callBack.onSquareChanged(square);
+                if (callBack != null) callBack.onSquareChanged(square);
             }
         };
         if (constrainMatrix == null) {
@@ -44,6 +44,6 @@ public class MagicSquareSolver extends AlgorithmSolver {
 
     public static void main(String[] args) {
         MagicSquareSolver magicSquareSolver = new MagicSquareSolver(20);
-        magicSquareSolver.run(null);
+        magicSquareSolver.run(null, false);
     }
 }

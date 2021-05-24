@@ -7,6 +7,7 @@ import com.arexh.magicsquare.ui.component.cell.BasicCell;
 import com.arexh.magicsquare.ui.component.cell.MagicSquareSumCell;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXSlider;
+import com.jfoenix.controls.JFXToggleButton;
 import javafx.application.Platform;
 import javafx.scene.CacheHint;
 import javafx.scene.SnapshotParameters;
@@ -21,7 +22,8 @@ public class MagicSquareBoard extends Pane {
     public static final double MARGIN_PROP = 0;
     public static final double CELL_MAX_SIZE = 40;
     public static final double CELL_MAX_WIDTH = 50;
-    public static final long MIN_UPDATE_INTERVAL = 100;
+    public static int MIN_UPDATE_INTERVAL = 100;
+    public static int MAX_UPDATE_INTERVAL = 2000;
 
     private final int[][] algorithmSquare;
     private final BasicCell[][] cells;
@@ -30,11 +32,23 @@ public class MagicSquareBoard extends Pane {
     private int magicConstant;
     private BasicCell draggedCell;
     private volatile boolean isUpdatingAlgorithmResult;
+    private MagicSquareSolver magicSquareSolver;
+    private boolean isAlgorithmPaused;
+    private int updateInterval = MIN_UPDATE_INTERVAL;
+
+    private JFXButton runAlgorithmBtn;
+    private JFXButton pauseAlgorithmBtn;
+    private JFXButton stopAlgorithmBtn;
+    private JFXButton restoreSquareBoardBtn;
+    private JFXToggleButton infiniteLoopBtn;
+    private JFXSlider dimensionSlider;
+    private JFXSlider updateIntervalSlider;
+
     private final Runnable updateAlgorithmResult = () -> {
         while (isUpdatingAlgorithmResult) {
             setSquare(MagicSquareBoard.this.algorithmSquare);
             try {
-                Thread.sleep(MIN_UPDATE_INTERVAL);
+                Thread.sleep(updateInterval);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -56,15 +70,42 @@ public class MagicSquareBoard extends Pane {
         initMagicConstant();
         updateSumCell();
         initSlider();
-        JFXButton startAlgorithm = new JFXButton("Algorithm");
-        startAlgorithm.getStyleClass().add("sudoku-back-button");
-        startAlgorithm.setLayoutX(SIZE + 20);
-        startAlgorithm.setLayoutY(200);
-        startAlgorithm.setOnMouseClicked(event -> {
+        initButton();
+    }
+
+    private void initButton() {
+        this.runAlgorithmBtn = new JFXButton("Start Algorithm");
+        runAlgorithmBtn.getStyleClass().add("sudoku-back-button");
+        runAlgorithmBtn.setLayoutX(SIZE + 20);
+        runAlgorithmBtn.setLayoutY(200);
+
+        this.restoreSquareBoardBtn = new JFXButton("Restore");
+        restoreSquareBoardBtn.getStyleClass().add("sudoku-back-button");
+        restoreSquareBoardBtn.setLayoutX(SIZE + 20);
+        restoreSquareBoardBtn.setLayoutY(250);
+
+        this.pauseAlgorithmBtn = new JFXButton("Pause");
+        pauseAlgorithmBtn.getStyleClass().add("sudoku-back-button");
+        pauseAlgorithmBtn.setLayoutX(SIZE + 20);
+        pauseAlgorithmBtn.setLayoutY(300);
+        pauseAlgorithmBtn.setDisable(true);
+
+        this.stopAlgorithmBtn = new JFXButton("Stop");
+        stopAlgorithmBtn.getStyleClass().add("sudoku-back-button");
+        stopAlgorithmBtn.setLayoutX(SIZE + 110);
+        stopAlgorithmBtn.setLayoutY(300);
+        stopAlgorithmBtn.setDisable(true);
+
+        this.infiniteLoopBtn = new JFXToggleButton();
+        infiniteLoopBtn.setText("Infinite");
+        infiniteLoopBtn.setLayoutX(SIZE + 20);
+        infiniteLoopBtn.setLayoutY(350);
+
+        runAlgorithmBtn.setOnMouseClicked(event -> {
             updateAlgorithmResult();
-            startAlgorithm.setDisable(true);
-            MagicSquareSolver magicSquareSolver = new MagicSquareSolver(dimension - 2);
-            magicSquareSolver.run(new AlgorithmSolver.SolverCallBack() {
+            algorithmRunning();
+            this.magicSquareSolver = new MagicSquareSolver(dimension - 2);
+            this.magicSquareSolver.run(new AlgorithmSolver.SolverCallBack() {
                 @Override
                 public void onReheat() {
 
@@ -78,32 +119,95 @@ public class MagicSquareBoard extends Pane {
                 @Override
                 public void onFinish() {
                     isUpdatingAlgorithmResult = false;
-                    Platform.runLater(() -> setSquare(MagicSquareBoard.this.algorithmSquare));
-                    startAlgorithm.setDisable(false);
+                    Platform.runLater(() -> {
+                        setSquare(MagicSquareBoard.this.algorithmSquare);
+                        algorithmStopped();
+                    });
                 }
-            });
+            }, infiniteLoopBtn.isSelected());
         });
-        getChildren().add(startAlgorithm);
+
+        pauseAlgorithmBtn.setOnMousePressed(event -> {
+            if (!isAlgorithmPaused) {
+                isAlgorithmPaused = true;
+                magicSquareSolver.pause();
+                pauseAlgorithmBtn.setText("Resume");
+            } else {
+                isAlgorithmPaused = false;
+                magicSquareSolver.resume();
+                pauseAlgorithmBtn.setText("Pause");
+            }
+        });
+
+        restoreSquareBoardBtn.setOnMousePressed(event -> {
+            initDefaultSquare();
+            setSquare(this.square);
+        });
+
+        stopAlgorithmBtn.setOnMousePressed(event -> {
+            magicSquareSolver.stop();
+            algorithmStopped();
+        });
+
+
+        getChildren().addAll(runAlgorithmBtn, restoreSquareBoardBtn, pauseAlgorithmBtn, stopAlgorithmBtn, infiniteLoopBtn);
+    }
+
+    private void algorithmRunning() {
+        this.isAlgorithmPaused = false;
+        this.runAlgorithmBtn.setDisable(true);
+        this.restoreSquareBoardBtn.setDisable(true);
+        this.pauseAlgorithmBtn.setDisable(false);
+        this.stopAlgorithmBtn.setDisable(false);
+        this.infiniteLoopBtn.setDisable(true);
+        this.dimensionSlider.setDisable(true);
+    }
+
+    private void algorithmStopped() {
+        this.isAlgorithmPaused = false;
+        this.isUpdatingAlgorithmResult = false;
+        this.runAlgorithmBtn.setDisable(false);
+        this.restoreSquareBoardBtn.setDisable(false);
+        this.pauseAlgorithmBtn.setDisable(true);
+        this.stopAlgorithmBtn.setDisable(true);
+        this.pauseAlgorithmBtn.setText("Pause");
+        this.infiniteLoopBtn.setDisable(false);
+        this.dimensionSlider.setDisable(false);
+
     }
 
     private void updateAlgorithmResult() {
+        if (isUpdatingAlgorithmResult) return;
         isUpdatingAlgorithmResult = true;
         new Thread(updateAlgorithmResult).start();
     }
 
     private void initSlider() {
-        JFXSlider slider = new JFXSlider(3, 20, 20);
-        slider.setLayoutX(SIZE + 15);
-        slider.setLayoutY(100);
-        slider.setPrefWidth(150);
-        slider.setPrefHeight(20);
-        slider.valueProperty().addListener((obs, oldval, newVal) -> {
-            slider.setValue(newVal.intValue());
+        this.dimensionSlider = new JFXSlider(3, 20, 20);
+        dimensionSlider.setLayoutX(SIZE + 15);
+        dimensionSlider.setLayoutY(100);
+        dimensionSlider.setPrefWidth(150);
+        dimensionSlider.setPrefHeight(20);
+        dimensionSlider.valueProperty().addListener((obs, oldval, newVal) -> {
+            dimensionSlider.setValue(newVal.intValue());
             if (oldval.intValue() != newVal.intValue()) {
                 resize(newVal.intValue());
             }
         });
-        getChildren().add(slider);
+
+        this.updateIntervalSlider = new JFXSlider(MIN_UPDATE_INTERVAL, MAX_UPDATE_INTERVAL, MIN_UPDATE_INTERVAL);
+        updateIntervalSlider.setLayoutX(SIZE + 15);
+        updateIntervalSlider.setLayoutY(140);
+        updateIntervalSlider.setPrefWidth(150);
+        updateIntervalSlider.setPrefHeight(20);
+        updateIntervalSlider.valueProperty().addListener((obs, oldval, newVal) -> {
+            updateIntervalSlider.setValue(newVal.intValue());
+            if (oldval.intValue() != newVal.intValue()) {
+                updateInterval = newVal.intValue();
+            }
+        });
+
+        getChildren().addAll(dimensionSlider, updateIntervalSlider);
     }
 
     private void resize(int dimension) {

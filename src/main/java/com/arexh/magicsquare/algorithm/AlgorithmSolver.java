@@ -7,9 +7,11 @@ public abstract class AlgorithmSolver {
     public AlgorithmSolver() {
     }
 
-    public void run(SolverCallBack callBack) {
+    public void run(SolverCallBack callBack, boolean isInfinite) {
         thread = new Thread(() -> {
-            solve(callBack);
+            do {
+                solve(callBack);
+            } while (isInfinite);
             if (callBack != null) callBack.onFinish();
         });
         thread.start();
