@@ -43,7 +43,25 @@ public class MagicSquareSolver extends AlgorithmSolver {
     }
 
     public static void main(String[] args) {
-        MagicSquareSolver magicSquareSolver = new MagicSquareSolver(20);
-        magicSquareSolver.run(null, false);
+        MagicSquareSolver magicSquareSolver = new MagicSquareSolver(20, new int[][]{
+                {1, 2, 3}, {4, 5, 6}, {7, 8, 9}
+        }, 0, 0);
+        magicSquareSolver.run(new SolverCallBack() {
+            @Override
+            public void onReheat() {
+
+            }
+
+            @Override
+            public void onSquareChanged(int[][] square) {
+                System.out.println("-----------");
+                HelperFunction.printMatrix(square);
+            }
+
+            @Override
+            public void onFinish() {
+
+            }
+        }, false);
     }
 }

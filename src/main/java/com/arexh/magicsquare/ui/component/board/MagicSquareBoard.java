@@ -120,7 +120,22 @@ public class MagicSquareBoard extends Pane {
         runAlgorithmBtn.setOnMouseClicked(event -> {
             updateAlgorithmResult();
             algorithmRunning();
-            this.magicSquareSolver = new MagicSquareSolver(dimension - 2);
+            if (selectedList.size() != 0) {
+                sortSelectedList();
+                BasicCell leftTop = selectedList.get(0);
+                int row = leftTop.getRow() + 1;
+                int column = leftTop.getColumn() + 1;
+                int[][] m = new int[this.curHeight][this.curWidth];
+                for (int i = 0; i < this.curHeight; i++) {
+                    for (int j = 0; j < this.curWidth; j++) {
+                        m[i][j] = cells[i + row][j + column].getValue();
+                        System.out.println(m[i][j]);
+                    }
+                }
+                this.magicSquareSolver = new MagicSquareSolver(dimension - 2, m, row - 1, column - 1);
+            } else {
+                this.magicSquareSolver = new MagicSquareSolver(dimension - 2);
+            }
             this.magicSquareSolver.run(new AlgorithmSolver.SolverCallBack() {
                 @Override
                 public void onReheat() {
@@ -423,12 +438,14 @@ public class MagicSquareBoard extends Pane {
         cell.setOnMousePressed(event -> {
             if (this.selectedMode) {
                 if (event.isPrimaryButtonDown()) {
-                    ((MagicSquareCell) cell).select();
-                    selectedList.add(cell);
+                    if (!selectedList.contains(cell)) {
+                        selectedList.add(cell);
+                        ((MagicSquareCell) cell).select();
+                    }
                 }
                 if (event.isSecondaryButtonDown()) {
-                    ((MagicSquareCell) cell).unSelect();
                     selectedList.remove(cell);
+                    ((MagicSquareCell) cell).unSelect();
                 }
             }
         });
