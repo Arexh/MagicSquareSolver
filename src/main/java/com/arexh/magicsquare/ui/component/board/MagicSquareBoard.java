@@ -1,5 +1,6 @@
 package com.arexh.magicsquare.ui.component.board;
 
+import com.arexh.magicsquare.algorithm.AlgorithmSolver;
 import com.arexh.magicsquare.algorithm.HelperFunction;
 import com.arexh.magicsquare.algorithm.MagicSquareSolver;
 import com.arexh.magicsquare.ui.component.cell.BasicCell;
@@ -20,7 +21,7 @@ public class MagicSquareBoard extends Pane {
     public static final double MARGIN_PROP = 0;
     public static final double CELL_MAX_SIZE = 40;
     public static final double CELL_MAX_WIDTH = 50;
-
+    public static final long MIN_UPDATE_INTERVAL = 100;
 
     private final int[][] algorithmSquare;
     private final BasicCell[][] cells;
@@ -28,7 +29,17 @@ public class MagicSquareBoard extends Pane {
     private int dimension;
     private int magicConstant;
     private BasicCell draggedCell;
-    private boolean isAlgorithmRunning;
+    private volatile boolean isUpdatingAlgorithmResult;
+    private final Runnable updateAlgorithmResult = () -> {
+        while (isUpdatingAlgorithmResult) {
+            setSquare(MagicSquareBoard.this.algorithmSquare);
+            try {
+                Thread.sleep(MIN_UPDATE_INTERVAL);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    };
 
     public MagicSquareBoard() {
         this.dimension = MAX_DIMENSION;
@@ -50,27 +61,34 @@ public class MagicSquareBoard extends Pane {
         startAlgorithm.setLayoutX(SIZE + 20);
         startAlgorithm.setLayoutY(200);
         startAlgorithm.setOnMouseClicked(event -> {
+            updateAlgorithmResult();
             startAlgorithm.setDisable(true);
-            new Thread(() -> {
-                MagicSquareSolver magicSquareSolver = new MagicSquareSolver(dimension - 2, new edu.cmu.cs.xfxie.MagicSquareSolver.AlgorithmCallBack() {
-                    @Override
-                    public void onAlgorithmReheat() {
-                        System.out.println("Reheated");
-                    }
+            MagicSquareSolver magicSquareSolver = new MagicSquareSolver(dimension - 2);
+            magicSquareSolver.run(new AlgorithmSolver.SolverCallBack() {
+                @Override
+                public void onReheat() {
 
-                    @Override
-                    public void onSquareChanged(int[][] square) {
-                        setAlgorithmSquare(square);
-                        Platform.runLater(() -> {
-                            setSquare(MagicSquareBoard.this.algorithmSquare);
-                        });
-                    }
-                });
-                magicSquareSolver.run();
-                startAlgorithm.setDisable(false);
-            }).start();
+                }
+
+                @Override
+                public void onSquareChanged(int[][] square) {
+                    setAlgorithmSquare(square);
+                }
+
+                @Override
+                public void onFinish() {
+                    isUpdatingAlgorithmResult = false;
+                    Platform.runLater(() -> setSquare(MagicSquareBoard.this.algorithmSquare));
+                    startAlgorithm.setDisable(false);
+                }
+            });
         });
         getChildren().add(startAlgorithm);
+    }
+
+    private void updateAlgorithmResult() {
+        isUpdatingAlgorithmResult = true;
+        new Thread(updateAlgorithmResult).start();
     }
 
     private void initSlider() {

@@ -3,28 +3,35 @@ package com.arexh.magicsquare.algorithm;
 public abstract class AlgorithmSolver {
 
     private Thread thread;
-    private volatile boolean isRunning;
 
     public AlgorithmSolver() {
     }
 
-    public void run() {
-        isRunning = true;
-        thread = new Thread(this::solve);
+    public void run(SolverCallBack callBack) {
+        thread = new Thread(() -> {
+            solve(callBack);
+            if (callBack != null) callBack.onFinish();
+        });
         thread.start();
     }
 
     public void pause() {
-        isRunning = false;
+        if (thread != null) thread.suspend();
     }
 
     public void resume() {
-        isRunning = true;
+        if (thread != null) thread.resume();
     }
 
-    public void interrupt() {
-        if (thread != null) thread.interrupt();
+    public void stop() {
+        if (thread != null) thread.stop();
     }
 
-    protected abstract void solve();
+    protected abstract void solve(SolverCallBack callback);
+
+    public interface SolverCallBack {
+        void onReheat();
+        void onSquareChanged(int[][] square);
+        void onFinish();
+    }
 }

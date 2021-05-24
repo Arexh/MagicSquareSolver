@@ -30,4 +30,14 @@ public class HelperFunction {
     public static int magicConstant(int dimension) {
         return (dimension * (dimension * dimension + 1)) / 2;
     }
+
+    public static void printMatrix(int[][] matrix) {
+        int dimension = matrix.length;
+        for (int[] ints : matrix) {
+            for (int j = 0; j < dimension - 1; ++j) {
+                System.out.print(ints[j] + ", ");
+            }
+            System.out.println(ints[dimension - 1]);
+        }
+    }
 }
